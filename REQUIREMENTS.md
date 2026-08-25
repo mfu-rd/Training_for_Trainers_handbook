@@ -63,6 +63,10 @@
 ## Git / Deploy
 
 - Local repo init แล้ว, remote `origin` → `git@github.com:ptrsswnr/Training_for_Trainers_handbook.git`, SSH key ตั้งค่าและใช้งานได้แล้ว
-- Deploy จริงผ่าน **Netlify** (เชื่อมจาก GitHub, auto-deploy ทุกครั้งที่ push ขึ้น `master`) — repo เป็น private, ใช้ GitHub App ของ Netlify ที่ให้สิทธิ์เข้าถึง repo นี้แล้ว
-- **กฎสำคัญ: อย่า `git push` ทันทีหลัง commit** — commit ไว้ในเครื่องก่อน แล้วถามผู้ใช้ยืนยันก่อน push ทุกครั้ง เพราะ push แต่ละครั้ง = Netlify auto-deploy หนึ่งครั้ง และบัญชี Netlify ของ มฟล. ใช้ "operational credits" ร่วมกับโปรเจกต์อื่น (เคยหมดมาแล้วครั้งหนึ่ง ทำให้ production deploy ถูกพักจนกว่าจะถึงรอบบิลลิ่งถัดไป) ผู้ใช้ขอให้ batch การแก้ไขและ confirm ก่อน push เพื่อประหยัด credit
-- ถ้า Netlify แจ้งว่า credit หมด/deploy ถูกพัก — ไม่ใช่บั๊กของเรา เว็บที่ deploy ไปแล้วยังออนไลน์ปกติ แค่ push ใหม่จะไม่ auto-deploy จนกว่าจะถึงรอบบิลลิ่งถัดไป (วันที่รีเซ็ตต้องเช็คในหน้า Netlify billing เอง ไม่มีข้อมูลนี้อยู่ในโค้ด/repo)
+- **Deploy: ย้ายจาก Netlify มาเป็น GitHub Pages แล้ว** (ตัดสินใจ 2569-08-25 หลัง Netlify credit ของทีม มฟล. หมดกลางทาง) — เหตุผล: GitHub Pages ฟรีไม่มีระบบเครดิตหมดอายุแบบ Netlify
+  - Repo เปลี่ยนเป็น **Public** แล้ว (ผู้ใช้ยืนยันว่าเนื้อหาไม่มีอะไรลับ) — ทำเองผ่าน GitHub Settings → Danger Zone → Change visibility (ผมทำแทนไม่ได้ ไม่มี GitHub API token)
+  - เปิด GitHub Pages เองผ่าน Settings → Pages → Source: Deploy from branch → Branch `master` / folder `/ (root)` (ผมทำแทนไม่ได้เช่นกัน)
+  - URL ใหม่: `https://ptrsswnr.github.io/Training_for_Trainers_handbook/` (แทนที่ลิงก์ Netlify เดิมทั้งหมด — ผู้ใช้ยืนยันว่ายังไม่เคยแจกลิงก์ Netlify ให้ใครไปจริงจัง เลยเปลี่ยนได้โดยไม่มีปัญหา)
+  - เพิ่มไฟล์ `.nojekyll` ที่ root แล้ว (ป้องกัน GitHub รัน Jekyll processing ใส่ static site ของเราโดยไม่ตั้งใจ)
+  - **ของที่ต้องเตือนผู้ใช้:** ควรไปลบ/ยกเลิกการเชื่อม site บน Netlify ด้วย (ที่ app.netlify.com) ไม่งั้นพอรอบเครดิตใหม่มา (~24-25 ก.ย.) มันจะกลับมา auto-deploy ทุกครั้งที่ push อีก แล้วแอบกินเครดิตของทีมต่อทั้ง ๆ ที่ไม่ได้ใช้แล้ว
+- ไม่มีข้อจำกัดเรื่อง credit/เครดิตหมดอีกต่อไปหลังย้ายมา GitHub Pages — **ไม่ต้องรอ confirm ก่อน push เพราะเรื่องเครดิตแล้ว** (กฎ "commit ก่อน push ทีหลัง" ที่ตั้งไว้ตอนใช้ Netlify ไม่มีเหตุผลรองรับอีกต่อไปสำหรับเหตุผลด้านเครดิต — แต่ยังเป็นนิสัยที่ดีทั่วไปที่จะ confirm การเปลี่ยนแปลงใหญ่ก่อน push อยู่ดี)
