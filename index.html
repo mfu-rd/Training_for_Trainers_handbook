@@ -128,7 +128,7 @@
   }
   .sidebar{
     flex:none; width:180px;
-    position:sticky; top:80px;
+    position:sticky; top:24px;
     display:flex; flex-direction:column; gap:2px;
   }
   .sidebar a{
@@ -137,7 +137,13 @@
     transition:background .15s;
   }
   .sidebar a:hover{ background:var(--color-surface); }
+  .sidebar-brand{ font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+  .sidebar-brand .dot{ width:10px; height:10px; border-radius:var(--radius-full); background:var(--color-primary); display:inline-block; }
+  .sidebar .theme-toggle{ margin-top:20px; align-self:flex-start; }
   .content{ flex:1; min-width:0; }
+  @media (min-width: 721px){
+    .site-header{ display:none; }
+  }
 
   /* Hero */
   .hero{ padding:56px 0 40px; text-align:center; background:linear-gradient(to top, #470303, #A60000); color:#FFFFFF; }
@@ -260,7 +266,7 @@
       <li><a href="#contact">ติดต่อ</a></li>
     </ul>
     <div class="header-actions">
-      <button class="theme-toggle" id="themeToggle" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
+      <button class="theme-toggle theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
       <button class="hamburger" id="hamburgerBtn" aria-label="เปิดเมนู">☰</button>
     </div>
   </div>
@@ -281,10 +287,12 @@
 
   <div class="layout">
     <aside class="sidebar">
+      <div class="sidebar-brand"><span class="dot"></span> TFT Handbook</div>
       <a href="#about">เกี่ยวกับ</a>
       <a href="#prepare">เตรียมตัว</a>
       <a href="#agenda">กำหนดการ</a>
       <a href="#contact">ติดต่อ</a>
+      <button class="theme-toggle theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
     </aside>
     <div class="content">
 
@@ -596,23 +604,23 @@
   function readStoredTheme(){ try { return localStorage.getItem('tft-theme'); } catch(e) { return null; } }
   function writeStoredTheme(v){ try { localStorage.setItem('tft-theme', v); } catch(e) {} }
 
-  const themeToggle = document.getElementById('themeToggle');
+  const themeToggles = document.querySelectorAll('.theme-toggle-btn');
   const root = document.documentElement;
   const saved = readStoredTheme();
   if (saved) root.setAttribute('data-theme', saved);
   updateToggleIcon();
-  themeToggle.addEventListener('click', () => {
+  themeToggles.forEach(btn => btn.addEventListener('click', () => {
     const current = root.getAttribute('data-theme') ||
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     const next = current === 'dark' ? 'light' : 'dark';
     root.setAttribute('data-theme', next);
     writeStoredTheme(next);
     updateToggleIcon();
-  });
+  }));
   function updateToggleIcon(){
     const current = root.getAttribute('data-theme') ||
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    themeToggle.textContent = current === 'dark' ? '☀️' : '🌙';
+    themeToggles.forEach(btn => btn.textContent = current === 'dark' ? '☀️' : '🌙');
   }
 </script>
 

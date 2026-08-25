@@ -83,8 +83,9 @@
 
 - **Navigation**
   - Top bar สูง 64px, พื้นขาว, Elevation Level 2 เมื่อ scroll, **border-radius 0 แต่ปุ่ม/ลิงก์ภายในโค้งมนหมด**
-  - **Desktop:** เมนูหลักย้ายจาก top bar มาเป็น **sidebar ซ้ายมือ** (`.sidebar`, กว้าง 180px, `position:sticky; top:80px`) แสดงเฉพาะ >720px — top bar เหลือแค่ brand + ปุ่ม theme toggle เท่านั้น
-  - **Mobile (≤720px):** sidebar ซ่อน, ใช้ปุ่ม hamburger เปิดเมนูแบบ dropdown จาก header แทน (`.nav-links`, มุมโค้งด้านล่าง `--radius-sm`)
+  - **Desktop (>720px):** ไม่มี top bar เลย — `.site-header` ถูกซ่อนทั้งหมด (`display:none`) เพราะหลังย้ายเมนูไป sidebar แล้ว top bar เหลือแค่ brand ลอยเดี่ยว ๆ ดูโหวงและไม่มีข้อมูลอะไร เอาออกดีกว่า แล้วย้าย brand ("TFT Handbook") + ปุ่ม theme toggle ไปอยู่ใน **sidebar ซ้ายมือ** แทน (`.sidebar`, กว้าง 180px, `position:sticky; top:24px`) เนื้อหาเลยเริ่มจาก hero เต็มจอทันทีไม่มีแถบว่างด้านบน
+  - **Mobile (≤720px):** sidebar ซ่อน, top bar (`.site-header`) กลับมาแสดงตามปกติ (brand + theme toggle + hamburger) เพราะเป็นทางเดียวที่จะเปิดเมนู dropdown ได้ (`.nav-links`, มุมโค้งด้านล่าง `--radius-sm`)
+  - มีปุ่ม theme toggle **2 ตัวในหน้าเดียว** (header มือถือ + sidebar เดสก์ท็อป) ใช้ class ร่วม `.theme-toggle-btn` — JS ต้อง sync ทั้งคู่พร้อมกันเสมอ (`querySelectorAll` ไม่ใช่ `getElementById`) ถ้าจะเพิ่มปุ่มลักษณะนี้อีกจุดในอนาคตให้ตาม pattern เดิม
   - รายการเมนู: เกี่ยวกับ / เตรียมตัว / กำหนดการ / ติดต่อ (ซ่อนหัวข้อที่ยังไม่มีข้อมูล เช่น เอกสารการอบรม, ข้อมูลผู้เข้าอบรม, ประกาศ จนกว่าจะมีเนื้อหาจริง) — sidebar และเมนู mobile ต้องมีรายการเดียวกันเสมอ แก้ที่เดียวอย่าลืมอีกที่
 
 ## Spacing
