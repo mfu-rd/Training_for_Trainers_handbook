@@ -19,7 +19,6 @@
 
 ### Dark mode
 - Background → #111111, Surface → #1E1E1E, Text Primary → #F2F2F2, Text Secondary → #A0A0A0, Border → rgba(255,255,255,0.08)
-- Card background → `rgba(255,255,255,0.19)` (ขาวโปร่งใส แยกต่างหากจาก Surface — ใช้เฉพาะ `.card`; chip/thead ยังใช้ Surface ทึบตามเดิม)
 
 ## Typography
 - **ฟอนต์เดียวทั้งเว็บ: Prompt** (Google Fonts) — น้ำหนักที่ใช้: 300, 400, 500, 600, 700
