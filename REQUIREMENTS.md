@@ -62,11 +62,12 @@
 
 ## Git / Deploy
 
-- Local repo init แล้ว, remote `origin` → `git@github.com:ptrsswnr/Training_for_Trainers_handbook.git`, SSH key ตั้งค่าและใช้งานได้แล้ว
+- Local repo init แล้ว, remote `origin` → `git@github.com:mfu-rd/Training_for_Trainers_handbook.git`, SSH key ตั้งค่าและใช้งานได้แล้ว
 - **Deploy: ย้ายจาก Netlify มาเป็น GitHub Pages แล้ว** (ตัดสินใจ 2569-08-25 หลัง Netlify credit ของทีม มฟล. หมดกลางทาง) — เหตุผล: GitHub Pages ฟรีไม่มีระบบเครดิตหมดอายุแบบ Netlify
   - Repo เปลี่ยนเป็น **Public** แล้ว (ผู้ใช้ยืนยันว่าเนื้อหาไม่มีอะไรลับ) — ทำเองผ่าน GitHub Settings → Danger Zone → Change visibility (ผมทำแทนไม่ได้ ไม่มี GitHub API token)
   - เปิด GitHub Pages เองผ่าน Settings → Pages → Source: Deploy from branch → Branch `master` / folder `/ (root)` (ผมทำแทนไม่ได้เช่นกัน)
-  - URL ใหม่: `https://ptrsswnr.github.io/Training_for_Trainers_handbook/` (แทนที่ลิงก์ Netlify เดิมทั้งหมด — ผู้ใช้ยืนยันว่ายังไม่เคยแจกลิงก์ Netlify ให้ใครไปจริงจัง เลยเปลี่ยนได้โดยไม่มีปัญหา)
+  - **ย้าย repo ไปอยู่ใต้ GitHub Organization แล้ว** เพื่อไม่ให้ URL ติดชื่อบัญชีส่วนตัว — ตั้งใจจะใช้ชื่อ `rd-mfu` แต่ชื่อซ้ำ เลยได้ org จริงชื่อ **`mfu-rd`** แทน (org "belongs to: a business/institution" คือ ม.แม่ฟ้าหลวง เผื่ออนาคตเก็บ repo อื่นของหน่วยงานไว้ที่เดียวกันได้) — ใช้วิธี GitHub "Transfer ownership" ไม่ใช่สร้าง repo ใหม่ ประวัติ commit ทั้งหมดติดไปด้วย, GitHub ตั้ง redirect จาก URL เก่าให้อัตโนมัติ
+  - URL ใหม่: `https://mfu-rd.github.io/Training_for_Trainers_handbook/` (แทนที่ลิงก์ Netlify เดิมทั้งหมด — ผู้ใช้ยืนยันว่ายังไม่เคยแจกลิงก์ Netlify ให้ใครไปจริงจัง เลยเปลี่ยนได้โดยไม่มีปัญหา)
   - เพิ่มไฟล์ `.nojekyll` ที่ root แล้ว (ป้องกัน GitHub รัน Jekyll processing ใส่ static site ของเราโดยไม่ตั้งใจ)
-  - **ของที่ต้องเตือนผู้ใช้:** ควรไปลบ/ยกเลิกการเชื่อม site บน Netlify ด้วย (ที่ app.netlify.com) ไม่งั้นพอรอบเครดิตใหม่มา (~24-25 ก.ย.) มันจะกลับมา auto-deploy ทุกครั้งที่ push อีก แล้วแอบกินเครดิตของทีมต่อทั้ง ๆ ที่ไม่ได้ใช้แล้ว
+  - **ของที่ต้องเตือนผู้ใช้:** ควรไปลบ/ยกเลิกการเชื่อม site บน Netlify ด้วย (ที่ app.netlify.com) ไม่งั้นพอรอบเครดิตใหม่มา (~24-25 ก.ย.) มันจะกลับมา auto-deploy ทุกครั้งที่ push อีก แล้วแอบกินเครดิตของทีมต่อทั้ง ๆ ที่ไม่ได้ใช้แล้ว (ผู้ใช้กด "disable" project บน Netlify ไว้แล้วแทนการลบถาวร — เพียงพอแล้ว)
 - ไม่มีข้อจำกัดเรื่อง credit/เครดิตหมดอีกต่อไปหลังย้ายมา GitHub Pages — **ไม่ต้องรอ confirm ก่อน push เพราะเรื่องเครดิตแล้ว** (กฎ "commit ก่อน push ทีหลัง" ที่ตั้งไว้ตอนใช้ Netlify ไม่มีเหตุผลรองรับอีกต่อไปสำหรับเหตุผลด้านเครดิต — แต่ยังเป็นนิสัยที่ดีทั่วไปที่จะ confirm การเปลี่ยนแปลงใหญ่ก่อน push อยู่ดี)
