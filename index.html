@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือกิจกรรม Training for the Trainers (TFT)</title>
+<meta name="description" content="คู่มือผู้เข้าร่วมกิจกรรม วิทยากรเพื่อการพัฒนานักวิจัย (Training for the Trainers) สำนักงานการวิจัยแห่งชาติ ร่วมกับมหาวิทยาลัยแม่ฟ้าหลวง">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-primary:#FF0000;
+    --color-primary-hover:#CC0000;
+    --color-secondary:#065FD4;
+    --color-neutral:#606060;
+    --color-bg:#FFFFFF;
+    --color-surface:#F2F2F2;
+    --color-surface-hover:#E9E9E9;
+    --color-text:#0F0F0F;
+    --color-text-secondary:#606060;
+    --color-border:#E5E5E5;
+    --color-success:#2BA640;
+    --color-success-bg:#E6F7EA;
+    --color-warning:#FB8C00;
+    --color-warning-bg:#FFF3E0;
+    --color-error:#FF0000;
+    --color-error-bg:#FFE8E8;
+    --radius-xs:8px;
+    --radius-sm:16px;
+    --radius-md:24px;
+    --radius-lg:32px;
+    --radius-full:9999px;
+    --shadow-1:0 1px 3px rgba(0,0,0,0.08);
+    --shadow-2:0 8px 24px rgba(0,0,0,0.12);
+    --shadow-3:0 16px 48px rgba(0,0,0,0.2);
+    --container-max:960px;
+    --font:'Prompt', sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --color-bg:#111111;
+      --color-surface:#1E1E1E;
+      --color-surface-hover:#282828;
+      --color-text:#F2F2F2;
+      --color-text-secondary:#A0A0A0;
+      --color-border:rgba(255,255,255,0.08);
+      --color-success-bg:rgba(43,166,64,0.16);
+      --color-warning-bg:rgba(251,140,0,0.16);
+      --color-error-bg:rgba(255,0,0,0.14);
+      --shadow-1:none;
+      --shadow-2:0 8px 24px rgba(0,0,0,0.4);
+      --shadow-3:0 16px 48px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --color-bg:#111111;
+    --color-surface:#1E1E1E;
+    --color-surface-hover:#282828;
+    --color-text:#F2F2F2;
+    --color-text-secondary:#A0A0A0;
+    --color-border:rgba(255,255,255,0.08);
+    --color-success-bg:rgba(43,166,64,0.16);
+    --color-warning-bg:rgba(251,140,0,0.16);
+    --color-error-bg:rgba(255,0,0,0.14);
+    --shadow-1:none;
+    --shadow-2:0 8px 24px rgba(0,0,0,0.4);
+    --shadow-3:0 16px 48px rgba(0,0,0,0.6);
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    font-family:var(--font);
+    background:var(--color-bg);
+    color:var(--color-text);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:var(--color-secondary); }
+  .wrap{ max-width:var(--container-max); margin:0 auto; padding:0 20px; }
+
+  /* Header / Nav */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:var(--color-bg);
+    border-bottom:1px solid var(--color-border);
+  }
+  .site-header.scrolled{ box-shadow:var(--shadow-2); }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .brand{ font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px; }
+  .brand .dot{ width:10px; height:10px; border-radius:var(--radius-full); background:var(--color-primary); display:inline-block; }
+  .nav-links{ display:flex; gap:4px; list-style:none; margin:0; padding:0; }
+  .nav-links a{
+    display:inline-block; padding:10px 16px; border-radius:var(--radius-full);
+    color:var(--color-text); text-decoration:none; font-size:14px; font-weight:500;
+    transition:background .15s;
+  }
+  .nav-links a:hover{ background:var(--color-surface); }
+  .theme-toggle{
+    width:40px; height:40px; border-radius:var(--radius-full); border:1px solid var(--color-border);
+    background:var(--color-bg); color:var(--color-text); cursor:pointer; font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .theme-toggle:hover{ background:var(--color-surface); }
+  .hamburger{ display:none; }
+
+  /* Hero */
+  .hero{ padding:56px 0 40px; text-align:center; }
+  .hero h1{ font-size:28px; line-height:1.35; font-weight:700; margin:0 0 12px; }
+  .hero p.lead{ color:var(--color-text-secondary); font-size:15px; max-width:640px; margin:0 auto 24px; }
+  .hero-chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+
+  /* Sections */
+  section{ padding:48px 0; border-top:1px solid var(--color-border); }
+  section:first-of-type{ border-top:none; }
+  .section-title{ font-size:22px; font-weight:600; margin:0 0 8px; }
+  .section-sub{ color:var(--color-text-secondary); font-size:14px; margin:0 0 28px; }
+
+  /* Chip */
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:var(--radius-full);
+    background:var(--color-surface); color:var(--color-text);
+    font-size:13px; font-weight:500; border:none; cursor:default;
+    white-space:nowrap;
+  }
+  .chip.static{ cursor:default; }
+  button.chip{ cursor:pointer; font-family:var(--font); }
+  button.chip:hover{ background:var(--color-surface-hover); }
+  button.chip.active{ background:var(--color-text); color:var(--color-bg); }
+  :root[data-theme="dark"] button.chip.active, @media (prefers-color-scheme:dark){ button.chip.active{ background:#F2F2F2; color:#111; } }
+
+  /* Badge */
+  .badge{
+    display:inline-flex; align-items:center; gap:4px;
+    padding:4px 12px; border-radius:var(--radius-full);
+    font-size:12px; font-weight:500;
+  }
+  .badge-warning{ background:var(--color-warning-bg); color:var(--color-warning); }
+  .badge-success{ background:var(--color-success-bg); color:var(--color-success); }
+  .badge-error{ background:var(--color-error-bg); color:var(--color-error); }
+
+  /* Card */
+  .card{
+    background:var(--color-surface);
+    border-radius:var(--radius-md);
+    padding:24px;
+    box-shadow:var(--shadow-1);
+  }
+  .card + .card{ margin-top:20px; }
+  .card h3{ margin:0 0 8px; font-size:16px; font-weight:600; }
+  .card .meta{ color:var(--color-text-secondary); font-size:13px; margin-bottom:10px; }
+  .card-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+
+  /* Checklist */
+  ul.checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px; }
+  ul.checklist li{ display:flex; align-items:flex-start; gap:12px; font-size:15px; }
+  ul.checklist .box{
+    flex:none; width:20px; height:20px; margin-top:2px;
+    border-radius:var(--radius-xs); border:2px solid var(--color-neutral);
+  }
+
+  /* Callout */
+  .callout{ display:flex; gap:12px; padding:16px 20px; border-radius:var(--radius-sm); font-size:14px; }
+  .callout.info{ background:rgba(6,95,212,0.08); }
+  .callout.warning{ background:var(--color-warning-bg); }
+  .callout .icon{ flex:none; }
+
+  /* Table */
+  .table-wrap{
+    overflow-x:auto; border-radius:var(--radius-md); border:1px solid var(--color-border);
+  }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px; }
+  thead th{
+    background:var(--color-surface); text-align:left; font-weight:600;
+    padding:12px 16px; white-space:nowrap;
+  }
+  thead tr th:first-child{ border-top-left-radius:var(--radius-sm); }
+  thead tr th:last-child{ border-top-right-radius:var(--radius-sm); }
+  tbody td{ padding:12px 16px; border-top:1px solid var(--color-border); vertical-align:top; }
+  tbody tr:hover td{ background:rgba(0,0,0,0.015); }
+  td.time{ white-space:nowrap; color:var(--color-text-secondary); font-weight:500; }
+  td.hours{ text-align:center; white-space:nowrap; }
+  td.place{ white-space:nowrap; color:var(--color-text-secondary); }
+  tr.break td{ color:var(--color-text-secondary); font-style:italic; }
+
+  /* Day panels */
+  .day-panel{ display:none; }
+  .day-panel.active{ display:block; }
+  .day-tabs{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+
+  /* Group table mentors */
+  .subheading{ font-size:16px; font-weight:600; margin:40px 0 16px; }
+
+  /* Contact */
+  .contact-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; font-size:15px; }
+
+  footer{ padding:32px 0; text-align:center; color:var(--color-text-secondary); font-size:13px; }
+
+  @media (max-width: 720px){
+    .nav-links{ display:none; }
+    .hero h1{ font-size:22px; }
+    section{ padding:36px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header" id="site-header">
+  <div class="wrap nav-inner">
+    <div class="brand"><span class="dot"></span> TFT Handbook</div>
+    <ul class="nav-links">
+      <li><a href="#about">เกี่ยวกับ</a></li>
+      <li><a href="#prepare">เตรียมตัว</a></li>
+      <li><a href="#agenda">กำหนดการ</a></li>
+      <li><a href="#announcements">ประกาศ</a></li>
+      <li><a href="#contact">ติดต่อ</a></li>
+    </ul>
+    <button class="theme-toggle" id="themeToggle" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" style="border-top:none;">
+    <div class="wrap">
+      <h1>วิทยากรเพื่อการพัฒนานักวิจัย<br>Training for the Trainers (TFT)</h1>
+      <p class="lead">สำนักงานการวิจัยแห่งชาติ (วช.) ร่วมกับ มหาวิทยาลัยแม่ฟ้าหลวง<br>28 กันยายน – 2 ตุลาคม 2569 · ณ วนาศรม มหาวิทยาลัยแม่ฟ้าหลวง จังหวัดเชียงราย</p>
+      <div class="hero-chips">
+        <span class="chip static">🗓️ อบรม 5 วัน</span>
+        <span class="chip static">👥 7 กลุ่มสาขา</span>
+        <span class="chip static">💸 ไม่มีค่าลงทะเบียน</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap">
+      <h2 class="section-title">เกี่ยวกับกิจกรรม</h2>
+      <p class="section-sub">ภาพรวมโครงการ วัตถุประสงค์ และกลุ่มเป้าหมาย</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>วัตถุประสงค์</h3>
+          <p style="margin:0; font-size:14px;">พัฒนาศักยภาพนักวิจัยสู่การเป็นวิทยากรมืออาชีพ ครอบคลุมการพัฒนาโจทย์วิจัย การออกแบบงานวิจัย และการเขียนข้อเสนอการวิจัยเชิงบูรณาการ</p>
+        </div>
+        <div class="card">
+          <h3>กลุ่มเป้าหมาย</h3>
+          <p style="margin:0; font-size:14px;">นักวิจัยที่มีรายชื่อในระบบ NRIIS และมีผลงานวิจัยตามเกณฑ์ วช. (หัวหน้าโครงการทุน FF/PMUs, H-index ในฐาน Scopus ไม่น้อยกว่า 5, มีผลงานตีพิมพ์ในฐาน Scopus)</p>
+        </div>
+        <div class="card">
+          <h3>วันและสถานที่</h3>
+          <p style="margin:0 0 6px; font-size:14px;"><strong>ปฐมนิเทศออนไลน์:</strong> 17 กันยายน 2569 (Zoom)</p>
+          <p style="margin:0 0 6px; font-size:14px;"><strong>ฝึกอบรม onsite:</strong> 28 ก.ย. – 2 ต.ค. 2569</p>
+          <p style="margin:0; font-size:14px;"><strong>สถานที่:</strong> วนาศรม ม.แม่ฟ้าหลวง จ.เชียงราย</p>
+        </div>
+      </div>
+
+      <h3 class="subheading" style="margin-top:32px;">7 กลุ่มสาขาวิชา</h3>
+      <div class="hero-chips" style="justify-content:flex-start;">
+        <span class="chip static">1. วิศวกรรมศาสตร์</span>
+        <span class="chip static">2. เกษตรศาสตร์</span>
+        <span class="chip static">3. วิทยาศาสตร์ธรรมชาติ</span>
+        <span class="chip static">4. วิทยาศาสตร์การแพทย์และสุขภาพ</span>
+        <span class="chip static">5. สังคมศาสตร์</span>
+        <span class="chip static">6. มนุษยศาสตร์</span>
+        <span class="chip static">7. บูรณาการ</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="prepare">
+    <div class="wrap">
+      <h2 class="section-title">การเตรียมตัวก่อนเดินทางมาร่วมอบรม</h2>
+      <p class="section-sub">ข้อมูลทั้งหมดที่ผู้เข้าร่วมควรทราบและเตรียมพร้อมก่อนวันเดินทางมาอบรม</p>
+
+      <div class="card">
+        <h3 style="margin-bottom:16px;">Checklist สิ่งที่ต้องทำ/เตรียม</h3>
+        <ul class="checklist">
+          <li><span class="box"></span> เข้าร่วม <strong>ปฐมนิเทศออนไลน์</strong> ก่อนการฝึกอบรม (17 กันยายน 2569 ผ่าน Zoom)</li>
+          <li><span class="box"></span> ศึกษาโครงสร้างหลักสูตรและ<a href="#agenda">กำหนดการ</a>ล่วงหน้า</li>
+          <li><span class="box"></span> เตรียม <strong>คอมพิวเตอร์/Notebook</strong> ส่วนตัวมาใช้ระหว่างการอบรม</li>
+          <li><span class="box"></span> เข้าร่วมกลุ่มสื่อสารออนไลน์ของโครงการ <span class="badge badge-warning">รอลิงก์</span></li>
+          <li><span class="box"></span> เข้าร่วมฝึกอบรมให้ครบตลอดระยะเวลา 5 วัน (28 ก.ย. – 2 ต.ค. 2569) เพื่อรับการรับรองเป็นวิทยากรต้นแบบ</li>
+        </ul>
+      </div>
+
+      <div class="card-grid" style="margin-top:20px;">
+        <div class="card">
+          <h3>สถานที่จัดกิจกรรม</h3>
+          <p class="meta">วนาศรม มหาวิทยาลัยแม่ฟ้าหลวง จังหวัดเชียงราย</p>
+          <ul style="margin:0; padding-left:18px; font-size:14px;">
+            <li>ห้องประชุมวนาสวรรค์ — พิธีเปิด/ปิด, บรรยายภาคทฤษฎีส่วนใหญ่</li>
+            <li>ห้องประชุมวนาทัศน์ — กิจกรรมกลุ่ม/ภาคปฏิบัติ</li>
+            <li>ลานอาหาร วนาศรม — มื้ออาหาร</li>
+            <li>ห้องพักวนาศรม — ที่พัก</li>
+          </ul>
+          <p style="margin-top:12px; font-size:13px;"><span class="badge badge-warning">รอข้อมูล</span> แผนที่/พิกัด และรายละเอียดการเดินทาง</p>
+        </div>
+        <div class="card">
+          <h3>ค่าใช้จ่าย</h3>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>ไม่มีค่าลงทะเบียน</strong></p>
+          <p style="margin:0 0 8px; font-size:14px;">มหาวิทยาลัยแม่ฟ้าหลวงสนับสนุน: อาหารกลางวัน อาหารเย็น และอาหารว่าง/เครื่องดื่มตลอดการอบรม</p>
+          <p style="margin:0; font-size:14px;"><strong>ผู้เข้ารับการฝึกอบรมรับผิดชอบเอง:</strong> ค่าที่พัก, ค่าเดินทาง, ค่าใช้จ่ายอื่น ๆ</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="agenda">
+    <div class="wrap">
+      <h2 class="section-title">กำหนดการ</h2>
+      <p class="section-sub">หลักสูตร "วิทยากรเพื่อการพัฒนานักวิจัย" ประจำปีงบประมาณ พ.ศ. 2569</p>
+
+      <div class="callout warning" style="margin-bottom:24px;">
+        <span class="icon">⚠️</span>
+        <span>กำหนดการอาจมีการปรับเปลี่ยนตามความเหมาะสม โปรดติดตามประกาศล่าสุดในหน้านี้</span>
+      </div>
+
+      <div class="day-tabs" id="dayTabs">
+        <button class="chip active" data-day="orientation">ปฐมนิเทศ 17 ก.ย.</button>
+        <button class="chip" data-day="d1">วันที่ 1 (28 ก.ย.)</button>
+        <button class="chip" data-day="d2">วันที่ 2 (29 ก.ย.)</button>
+        <button class="chip" data-day="d3">วันที่ 3 (30 ก.ย.)</button>
+        <button class="chip" data-day="d4">วันที่ 4 (1 ต.ค.)</button>
+        <button class="chip" data-day="d5">วันที่ 5 (2 ต.ค.)</button>
+      </div>
+
+      <div class="day-panel active" id="panel-orientation">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เวลา</th><th>รายการ</th><th>สถานที่</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="time">09.00 – 12.00 น.</td>
+                <td>กิจกรรมชี้แจงผู้เข้าอบรม พร้อมบรรยาย:<br>
+                  1) "นโยบายและทิศทางการสนับสนุนทุนในระบบวิทยาศาสตร์ วิจัยและนวัตกรรม (กองทุน ววน.)" โดย ศ.ดร.คมกฤต เล็กสกุล (รองผู้อำนวยการ สกสว.)<br>
+                  2) "เทคนิคและเครื่องมือการวิเคราะห์ SROI" โดย อ.ดร.วารัชต์ มัธยมบุรุษ (คณะบริหารธุรกิจและนิเทศศาสตร์ ม.พะเยา)
+                </td>
+                <td class="place">ผ่านระบบ Zoom Online</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="day-panel" id="panel-d1">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th></tr></thead>
+            <tbody>
+              <tr><td class="time">08.00 – 08.30</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">08.30 – 09.00</td><td>พิธีเปิด — กล่าวรายงานและกล่าวต้อนรับ โดย รองอธิการบดี ม.แม่ฟ้าหลวง (ศ.ดร.สุจิตรา วงศ์เกษมจิตต์); กล่าวเปิดกิจกรรม โดย ผู้อำนวยการ วช. หรือผู้แทน</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">09.00 – 11.00</td><td>หมวดที่ 1 จริยธรรมและมาตรฐานการวิจัยสำหรับวิทยากร (ภาคทฤษฎี) — วิทยากร: ศ.นพ.ยง ภู่วรวรรณ (คณะแพทยศาสตร์ จุฬาฯ)</td><td class="hours">2</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">11.00 – 11.15</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">11.15 – 12.15</td><td>หมวดที่ 1 (ต่อ) — วิทยากร: ผศ.ดร.ศิวาภรณ์ ศิวะศิลป์ประศาสน์ (สำนักวิชาแพทยศาสตร์ ม.แม่ฟ้าหลวง)</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">12.15 – 13.00</td><td>รับประทานอาหารกลางวัน</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr class="break"><td class="time">12.45 – 13.00</td><td>ลงทะเบียน (ภาคบ่าย)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">13.00 – 15.00</td><td>หมวดที่ 2 การพัฒนาโจทย์วิจัยเชิงบูรณาการ (ภาคทฤษฎี) — วิทยากร: ผศ.ดร.สุวิชาน พัฒนาไพรวัลย์ (สำนักวิชาศิลปศาสตร์ ม.แม่ฟ้าหลวง)</td><td class="hours">2</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">15.00 – 15.15</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">15.15 – 17.15</td><td>หมวดที่ 3 การทบทวนวรรณกรรมและการวิเคราะห์บริบททางการวิจัย (ภาคทฤษฎี) — วิทยากร: รศ.ดร.พลวัฒ ประพัฒน์ทอง (สำนักวิชาศิลปศาสตร์ / หัวหน้าสถาบันศิลปวัฒนธรรมและอารยธรรมลุ่มน้ำโขง ม.แม่ฟ้าหลวง)</td><td class="hours">2</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">17.15 – 18.00</td><td>รับประทานอาหารเย็น</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr><td class="time">18.00 – 20.00</td><td>หมวดที่ 2 (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">2</td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr class="break"><td class="time">20.00</td><td>เข้าที่พัก พักผ่อนตามอัธยาศัย</td><td class="hours"></td><td class="place">ห้องพักวนาศรม</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="day-panel" id="panel-d2">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th></tr></thead>
+            <tbody>
+              <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">09.00 – 10.30</td><td>หมวดที่ 4 การออกแบบการวิจัยขั้นสูงและหลักการวิเคราะห์ข้อมูล (ภาคทฤษฎี) — กรณีศึกษาการออกแบบการวิจัยที่ซับซ้อน — วิทยากร: ศ.ดร.สาโรจน์ รอดคืน (สำนักวิชาอุตสาหกรรมเกษตร ม.แม่ฟ้าหลวง)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">10.30 – 10.45</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">10.45 – 12.00</td><td>หมวดที่ 4 (ภาคทฤษฎี ต่อ) — วิทยากร: ศ.ดร.สาโรจน์ รอดคืน</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">12.00 – 13.00</td><td>รับประทานอาหารกลางวัน</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr class="break"><td class="time">12.45 – 13.00</td><td>ลงทะเบียน (ภาคบ่าย)</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">13.00 – 15.00</td><td>หมวดที่ 3 การทบทวนวรรณกรรมฯ และการนำเสนอโจทย์การวิจัย (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">2</td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr class="break"><td class="time">15.00 – 15.15</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">15.15 – 18.15</td><td>หมวดที่ 4 (ภาคปฏิบัติ):<br>1) การใช้ปัญญาประดิษฐ์และซอฟต์แวร์ช่วยออกแบบการวิจัย (1 ชม.) — วิทยากร: ผศ.ดร.พฤทธิ์ พุฒจร (สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ ม.แม่ฟ้าหลวง)<br>2) กิจกรรมกลุ่มหัวข้อการออกแบบการวิจัยขั้นสูงและหลักการวิเคราะห์ข้อมูล (2 ชม.)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr class="break"><td class="time">18.15 – 19.30</td><td>รับประทานอาหารเย็น</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr class="break"><td class="time">19.30</td><td>เข้าที่พัก พักผ่อนตามอัธยาศัย</td><td class="hours"></td><td class="place">ห้องพักวนาศรม</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="day-panel" id="panel-d3">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th></tr></thead>
+            <tbody>
+              <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">09.00 – 10.30</td><td>หมวดที่ 5 การเขียนข้อเสนอการวิจัยเชิงบูรณาการ (ภาคทฤษฎี) — วิทยากร: ศ.ดร.ผดุงศักดิ์ รัตนเดโช (ผู้ทรงคุณวุฒิ บพท.)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">10.30 – 10.45</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">10.45 – 12.00</td><td>หมวดที่ 5 (ภาคทฤษฎี ต่อ) — วิทยากร: ศ.ดร.ผดุงศักดิ์ รัตนเดโช</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">12.00 – 13.00</td><td>รับประทานอาหารกลางวัน</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr class="break"><td class="time">12.45 – 13.00</td><td>ลงทะเบียน (ภาคบ่าย)</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">13.00 – 17.00</td><td>หมวดที่ 5 (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)<br><em>หมายเหตุ: รับประทานอาหารว่างนำเข้ามาทานในห้อง</em></td><td class="hours">6</td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr class="break"><td class="time">17.00 – 18.00</td><td>รับประทานอาหารเย็น</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr><td class="time">18.00 – 20.00</td><td>หมวดที่ 5 (ภาคปฏิบัติ ต่อ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="day-panel" id="panel-d4">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th></tr></thead>
+            <tbody>
+              <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">09.00 – 10.00</td><td>หมวดที่ 6.1 การถ่ายทอดองค์ความรู้และประสบการณ์การวิจัย (ภาคทฤษฎี) — วิทยากร: รศ.ดร.ระวิวรรณ์ เจริญทรัพย์ (หัวหน้าศูนย์นวัตกรรมสมุนไพรครบวงจร ม.แม่ฟ้าหลวง)</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">10.00 – 11.00</td><td>หมวดที่ 6.2 แนวคิดหลักสูตรและการวางแผนการจัดกิจกรรมฝึกอบรมตามแนวทาง OBE — วิทยากร: รศ.ดร.กมลวรรณ คารมปราชญ์ คล้ายแก้ว และ อ.ดร.เมทินี ทนงกิจ (สำนักนวัตกรรมการเรียนรู้ มศว)</td><td class="hours">1</td><td class="place">—</td></tr>
+              <tr class="break"><td class="time">11.00 – 11.15</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">11.15 – 12.15</td><td>หมวดที่ 6.3 ทักษะการเป็นวิทยากรและการถ่ายทอดองค์ความรู้ — วิทยากร: ผศ.ดร.พิมพาภรณ์ บุญประเสริฐ (คณะมนุษยศาสตร์ มศว)</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">12.15 – 13.15</td><td>รับประทานอาหารกลางวัน</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr class="break"><td class="time">13.00 – 13.15</td><td>ลงทะเบียน (ภาคบ่าย)</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">13.15 – 15.15</td><td>ศึกษาดูงานศูนย์ความเป็นเลิศ มฟล.:<br>1) พิพิธภัณฑ์สถาบันศิลปวัฒนธรรมและอารยธรรมลุ่มน้ำโขง<br>2) โรงงานแปรรูปและโรงงานผลิตยาสมุนไพร ศูนย์นวัตกรรมสมุนไพรครบวงจร<br>3) โรงงานต้นแบบเครื่องสำอาง และ Cosmetic Maker Space</td><td class="hours"></td><td class="place">มหาวิทยาลัยแม่ฟ้าหลวง</td></tr>
+              <tr class="break"><td class="time">15.15 – 15.30</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">15.30 – 18.30</td><td>หมวดที่ 6 (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาทัศน์</td></tr>
+              <tr><td class="time">18.30 – 21.00</td><td>กิจกรรมสร้างเครือข่ายบูรณาการ</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">21.00</td><td>เข้าที่พัก พักผ่อนตามอัธยาศัย</td><td class="hours"></td><td class="place">ห้องพักวนาศรม</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="day-panel" id="panel-d5">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th></tr></thead>
+            <tbody>
+              <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">09.00 – 10.30</td><td>หมวดที่ 7 การบริหารการวิจัยและการสร้างเครือข่ายการวิจัยเชิงบูรณาการ (ภาคทฤษฎี) — รูปแบบการเสวนา วิทยากร:<br>1) รศ.ดร.พลวัฒ ประพัฒน์ทอง (หัวหน้าสถาบันศิลปวัฒนธรรมและอารยธรรมลุ่มน้ำโขง)<br>2) รศ.ดร.ระวิวรรณ์ เจริญทรัพย์ (หัวหน้าศูนย์นวัตกรรมสมุนไพรครบวงจร)<br>3) ผศ.ดร.อมร โอวาทวรกิจ (หัวหน้าสถาบันชาและกาแฟ)<br>4) ผศ.ดร.สุวิชาน พัฒนาไพรวัลย์ (หัวหน้าหน่วยวิจัยนิเวศปัญญาชาติพันธุ์ฯ)<br>5) นายกานต์กุญช์ บำรุงชาติ (หัวหน้าส่วนบริหารงานวิจัย — ผู้ดำเนินรายการ)</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">10.30 – 10.45</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">10.45 – 11.45</td><td>หมวดที่ 7 (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">11.45 – 13.00</td><td>รับประทานอาหารกลางวัน</td><td class="hours"></td><td class="place">ลานอาหาร วนาศรม</td></tr>
+              <tr><td class="time">13.00 – 14.30</td><td>การนำเสนอแนวคิดการวิจัย (นำเสนอ 6 กลุ่ม ๆ ละ 10 นาที ซักถาม 5 นาที)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr><td class="time">13.30 – 14.30</td><td>พิธีปิด สรุปประเมินผล และรับวุฒิบัตร</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td></tr>
+              <tr class="break"><td class="time">14.30</td><td>เดินทางกลับโดยสวัสดิภาพ</td><td class="hours"></td><td class="place">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="subheading">วิทยากรที่ปรึกษาประจำกลุ่ม</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>กลุ่ม</th><th>สาขาวิจัย</th><th>วิทยากรที่ปรึกษา</th></tr></thead>
+          <tbody>
+            <tr><td class="hours">1</td><td>วิศวกรรมศาสตร์</td><td>รศ.ดร.พรรณฤมล เต็มดี (ม.แม่ฟ้าหลวง), รศ.ดร.จันจิรา จับศิลป์ (ม.ศรีนครินทรวิโรฒ)</td></tr>
+            <tr><td class="hours">2</td><td>เกษตรศาสตร์</td><td>ศ.ดร.สาโรจน์ รอดคืน (ม.แม่ฟ้าหลวง), รศ.ดร.พจมาลย์ สุรนิลพงศ์ (ม.วลัยลักษณ์)</td></tr>
+            <tr><td class="hours">3</td><td>วิทยาศาสตร์ธรรมชาติ</td><td>ผศ.ดร.อมร โอวาทวรกิจ (ม.แม่ฟ้าหลวง), รศ.ดร.ชมภูนุช กลิ่นวงษ์ (จุฬาฯ)</td></tr>
+            <tr><td class="hours">4</td><td>วิทยาศาสตร์การแพทย์และสุขภาพ</td><td>รศ.ดร.ระวิวรรณ์ เจริญทรัพย์ (ม.แม่ฟ้าหลวง), รศ.ดร.วรวุฒิ สมศักดิ์ (ม.วลัยลักษณ์)</td></tr>
+            <tr><td class="hours">5</td><td>สังคมศาสตร์</td><td>รศ.ดร.พลวัฒ ประพัฒน์ทอง (ม.แม่ฟ้าหลวง), ผศ.ดร.รัตติยา เหนืออำนาจ (ม.นครพนม)</td></tr>
+            <tr><td class="hours">6</td><td>มนุษยศาสตร์</td><td>ผศ.ดร.สุวิชาน พัฒนาไพรวัลย์ (ม.แม่ฟ้าหลวง), รศ.ดร.เจริญชัย เอกมาไพศาล (สถาบันบัณฑิตพัฒนบริหารศาสตร์)</td></tr>
+            <tr><td class="hours">7</td><td>บูรณาการ</td><td>ดร.วารัชต์ มัธยมบุรุษ (ม.พะเยา), รศ.ดร.ศจีมาจ ณ วิเชียร (มจพ.)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="announcements">
+    <div class="wrap">
+      <h2 class="section-title">ประกาศสำคัญ</h2>
+      <p class="section-sub">เรียงจากล่าสุดไปเก่าสุด — อัปเดตเมื่อมีการเปลี่ยนแปลงกำหนดการ เอกสาร หรือข้อมูลอื่น ๆ</p>
+
+      <div class="card">
+        <span class="badge badge-warning" style="margin-bottom:10px;">แจ้งเตือน</span>
+        <h3>กำหนดการอาจเปลี่ยนแปลง</h3>
+        <p style="margin:0; font-size:14px;"><a href="#agenda">กำหนดการ</a>ฝึกอบรมอาจมีการปรับเปลี่ยนตามความเหมาะสม โปรดติดตามประกาศล่าสุดในหน้านี้</p>
+      </div>
+      <div class="card">
+        <span class="badge badge-success" style="margin-bottom:10px;">ปิดรับสมัครแล้ว</span>
+        <h3>รับสมัคร</h3>
+        <p style="margin:0; font-size:14px;">เปิดรับสมัครถึงวันที่ 20 สิงหาคม 2569 (ปิดรับสมัครแล้ว)</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <h2 class="section-title">ติดต่อสอบถาม</h2>
+      <div class="card">
+        <h3>ผู้ประสานงาน</h3>
+        <p class="meta" style="margin-bottom:16px;">ส่วนบริหารงานวิจัย มหาวิทยาลัยแม่ฟ้าหลวง</p>
+        <ul class="contact-list">
+          <li>📞 0 5391 6389 (คุณเหน่ง)</li>
+          <li>📞 0 5391 6359 (คุณปอนด์)</li>
+          <li>✉️ <a href="mailto:research@mfu.ac.th">research@mfu.ac.th</a></li>
+          <li>📘 Facebook: Research MFU</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">สำนักงานการวิจัยแห่งชาติ (วช.) × มหาวิทยาลัยแม่ฟ้าหลวง — Training for the Trainers</div>
+</footer>
+
+<script>
+  // sticky header shadow on scroll
+  const header = document.getElementById('site-header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 4);
+  });
+
+  // day tabs
+  const tabs = document.querySelectorAll('#dayTabs .chip');
+  const panels = document.querySelectorAll('.day-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.day).classList.add('active');
+    });
+  });
+
+  // theme toggle (localStorage may be blocked on file:// / sandboxed origins — degrade gracefully)
+  function readStoredTheme(){ try { return localStorage.getItem('tft-theme'); } catch(e) { return null; } }
+  function writeStoredTheme(v){ try { localStorage.setItem('tft-theme', v); } catch(e) {} }
+
+  const themeToggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  const saved = readStoredTheme();
+  if (saved) root.setAttribute('data-theme', saved);
+  updateToggleIcon();
+  themeToggle.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    writeStoredTheme(next);
+    updateToggleIcon();
+  });
+  function updateToggleIcon(){
+    const current = root.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    themeToggle.textContent = current === 'dark' ? '☀️' : '🌙';
+  }
+</script>
+
+</body>
+</html>
