@@ -62,6 +62,7 @@
 
 ## Git / Deploy
 
-- Local repo init แล้ว, remote `origin` → `git@github.com:ptrsswnr/Training_for_Trainers_handbook.git`
-- ยังไม่ได้ตั้งค่า SSH key / auth วิธี push ยังไม่ได้ตกลง — อย่าสมมติว่าตั้งค่าแล้วจนกว่าจะยืนยันกับผู้ใช้
-- ยังไม่มีการตัดสินใจเรื่อง hosting/deploy (เช่น GitHub Pages) — ถ้าผู้ใช้ต้องการ ให้ถามก่อนตั้งค่า
+- Local repo init แล้ว, remote `origin` → `git@github.com:ptrsswnr/Training_for_Trainers_handbook.git`, SSH key ตั้งค่าและใช้งานได้แล้ว
+- Deploy จริงผ่าน **Netlify** (เชื่อมจาก GitHub, auto-deploy ทุกครั้งที่ push ขึ้น `master`) — repo เป็น private, ใช้ GitHub App ของ Netlify ที่ให้สิทธิ์เข้าถึง repo นี้แล้ว
+- **กฎสำคัญ: อย่า `git push` ทันทีหลัง commit** — commit ไว้ในเครื่องก่อน แล้วถามผู้ใช้ยืนยันก่อน push ทุกครั้ง เพราะ push แต่ละครั้ง = Netlify auto-deploy หนึ่งครั้ง และบัญชี Netlify ของ มฟล. ใช้ "operational credits" ร่วมกับโปรเจกต์อื่น (เคยหมดมาแล้วครั้งหนึ่ง ทำให้ production deploy ถูกพักจนกว่าจะถึงรอบบิลลิ่งถัดไป) ผู้ใช้ขอให้ batch การแก้ไขและ confirm ก่อน push เพื่อประหยัด credit
+- ถ้า Netlify แจ้งว่า credit หมด/deploy ถูกพัก — ไม่ใช่บั๊กของเรา เว็บที่ deploy ไปแล้วยังออนไลน์ปกติ แค่ push ใหม่จะไม่ auto-deploy จนกว่าจะถึงรอบบิลลิ่งถัดไป (วันที่รีเซ็ตต้องเช็คในหน้า Netlify billing เอง ไม่มีข้อมูลนี้อยู่ในโค้ด/repo)
