@@ -93,13 +93,20 @@
   }
   .brand{ font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px; }
   .brand .dot{ width:10px; height:10px; border-radius:var(--radius-full); background:var(--color-primary); display:inline-block; }
-  .nav-links{ display:flex; gap:4px; list-style:none; margin:0; padding:0; }
+  /* nav-links now lives only as the mobile dropdown menu — desktop nav moved to .sidebar */
+  .nav-links{
+    display:none; position:absolute; top:64px; left:0; right:0;
+    flex-direction:column; gap:2px; list-style:none; margin:0; padding:12px;
+    background:var(--color-bg); border-radius:0 0 var(--radius-sm) var(--radius-sm);
+    box-shadow:var(--shadow-2);
+  }
   .nav-links a{
-    display:inline-block; padding:10px 16px; border-radius:var(--radius-full);
+    display:block; padding:10px 16px; border-radius:var(--radius-full);
     color:var(--color-text); text-decoration:none; font-size:14px; font-weight:500;
     transition:background .15s;
   }
   .nav-links a:hover{ background:var(--color-surface); }
+  .site-header.nav-open .nav-links{ display:flex; }
   .theme-toggle{
     width:40px; height:40px; border-radius:var(--radius-full); border:1px solid var(--color-border);
     background:var(--color-bg); color:var(--color-text); cursor:pointer; font-size:16px;
@@ -113,6 +120,24 @@
     cursor:pointer; font-size:18px; align-items:center; justify-content:center;
   }
   .hamburger:hover{ background:var(--color-surface); }
+
+  /* Sidebar layout (desktop) */
+  .layout{
+    display:flex; align-items:flex-start; gap:40px;
+    max-width:var(--container-max); margin:0 auto; padding:0 20px;
+  }
+  .sidebar{
+    flex:none; width:180px;
+    position:sticky; top:80px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .sidebar a{
+    display:block; padding:10px 16px; border-radius:var(--radius-full);
+    color:var(--color-text); text-decoration:none; font-size:14px; font-weight:500;
+    transition:background .15s;
+  }
+  .sidebar a:hover{ background:var(--color-surface); }
+  .content{ flex:1; min-width:0; }
 
   /* Hero */
   .hero{ padding:56px 0 40px; text-align:center; background:linear-gradient(to top, #470303, #A60000); color:#FFFFFF; }
@@ -215,17 +240,11 @@
   footer{ padding:32px 0; text-align:center; color:var(--color-text-secondary); font-size:13px; }
 
   @media (max-width: 720px){
-    .nav-links{
-      display:none; position:absolute; top:64px; left:0; right:0;
-      flex-direction:column; gap:2px; background:var(--color-bg);
-      border-radius:0 0 var(--radius-sm) var(--radius-sm);
-      box-shadow:var(--shadow-2); padding:12px; margin:0;
-    }
-    .nav-links a{ display:block; }
-    .site-header.nav-open .nav-links{ display:flex; }
     .hamburger{ display:flex; }
     .hero h1{ font-size:22px; }
     section{ padding:36px 0; }
+    .layout{ display:block; }
+    .sidebar{ display:none; }
   }
 </style>
 </head>
@@ -260,8 +279,16 @@
     </div>
   </section>
 
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="#about">เกี่ยวกับ</a>
+      <a href="#prepare">เตรียมตัว</a>
+      <a href="#agenda">กำหนดการ</a>
+      <a href="#contact">ติดต่อ</a>
+    </aside>
+    <div class="content">
+
   <section id="about">
-    <div class="wrap">
       <h2 class="section-title">เกี่ยวกับกิจกรรม</h2>
       <p class="section-sub">ภาพรวมโครงการ วัตถุประสงค์ และกลุ่มเป้าหมาย</p>
 
@@ -292,11 +319,9 @@
         <span class="chip static">6. มนุษยศาสตร์</span>
         <span class="chip static">7. บูรณาการ</span>
       </div>
-    </div>
   </section>
 
   <section id="prepare">
-    <div class="wrap">
       <h2 class="section-title">การเตรียมตัวก่อนเดินทางมาร่วมอบรม</h2>
       <p class="section-sub">ข้อมูลทั้งหมดที่ผู้เข้าร่วมควรทราบและเตรียมพร้อมก่อนวันเดินทางมาอบรม</p>
 
@@ -335,11 +360,9 @@
           <p style="margin:0; font-size:14px;"><strong>ผู้เข้ารับการฝึกอบรมรับผิดชอบเอง:</strong> ค่าที่พัก, ค่าเดินทาง, ค่าใช้จ่ายอื่น ๆ</p>
         </div>
       </div>
-    </div>
   </section>
 
   <section id="agenda">
-    <div class="wrap">
       <h2 class="section-title">กำหนดการ</h2>
       <p class="section-sub">หลักสูตร "วิทยากรเพื่อการพัฒนานักวิจัย" ประจำปีงบประมาณ พ.ศ. 2569</p>
 
@@ -493,7 +516,6 @@
           </tbody>
         </table>
       </div>
-    </div>
   </section>
 
   <!-- ประกาศสำคัญ: ซ่อนไว้ก่อนจนกว่าจะมีประกาศจริงที่ควรแจ้งผู้เข้าอบรม (เนื้อหายังอยู่ใน docs/05-announcements.md)
@@ -517,7 +539,6 @@
   -->
 
   <section id="contact">
-    <div class="wrap">
       <h2 class="section-title">ติดต่อสอบถาม</h2>
       <div class="card">
         <h3>ผู้ประสานงาน</h3>
@@ -529,8 +550,10 @@
           <li>📘 Facebook: Research MFU</li>
         </ul>
       </div>
-    </div>
   </section>
+
+    </div>
+  </div>
 </main>
 
 <footer>
