@@ -34,7 +34,7 @@
     --shadow-1:0 1px 3px rgba(0,0,0,0.08);
     --shadow-2:0 8px 24px rgba(0,0,0,0.12);
     --shadow-3:0 16px 48px rgba(0,0,0,0.2);
-    --container-max:1200px;
+    --container-max:1400px;
     --font:'Prompt', sans-serif;
   }
   @media (prefers-color-scheme: dark){
@@ -124,7 +124,7 @@
   /* Sidebar layout (desktop) */
   .layout{
     display:flex; align-items:flex-start; gap:40px;
-    max-width:var(--container-max); margin:0 auto; padding:32px 20px 0;
+    width:100%; margin:0 auto; padding:32px 40px 0; box-sizing:border-box;
   }
   .sidebar{
     flex:none; width:180px;
