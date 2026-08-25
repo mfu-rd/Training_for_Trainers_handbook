@@ -101,11 +101,11 @@
 - **9999px**: ปุ่มทั้งหมด, chip, badge, avatar
 
 ## Hero banner
-- พื้นหลัง hero (ชื่อกิจกรรม): `#590000` (แดงเลือดหมูเข้ม) คงที่ทั้ง light/dark mode — ตัวอักษรหัวข้อ h1 เป็นสีขาว `#FFFFFF`, ข้อความรอง (lead) เป็นขาวโปร่ง `rgba(255,255,255,0.8)`
+- พื้นหลัง hero (ชื่อกิจกรรม): gradient `linear-gradient(to top, #470303, #A60000)` (ล่างเข้ม → บนสว่าง) คงที่ทั้ง light/dark mode — ตัวอักษรหัวข้อ h1 เป็นสีขาว `#FFFFFF`, ข้อความรอง (lead) เป็นขาวโปร่ง `rgba(255,255,255,0.8)`
 - Chip ใน hero ยังใช้ Surface ตามปกติ (พื้นอ่อน ตัวอักษรเข้ม) เพราะตัดกับพื้นแดงเข้มได้ดีอยู่แล้ว ไม่ต้องปรับ
 
 ## Agenda day-tab active state
-- Chip ที่ active อยู่ใน day tabs (เลือกวัน): **day mode เท่านั้น** ใช้ `#590000` พื้น + ตัวอักษรขาว — dark mode ยังใช้พื้นอ่อน `#F2F2F2` + ตัวอักษรเข้มตามเดิม
+- Chip ที่ active อยู่ใน day tabs (เลือกวัน): **day mode เท่านั้น** ใช้ gradient เดียวกับ hero (`linear-gradient(to top, #470303, #A60000)`) พื้น + ตัวอักษรขาว — dark mode ยังใช้พื้นอ่อน `#F2F2F2` + ตัวอักษรเข้มตามเดิม
 - **ข้อควรระวัง:** เดิมมี CSS bug — เขียน selector ผสม `:root[data-theme="dark"] button.chip.active, @media (...) { ... }` ไว้ในบรรทัดเดียว ซึ่งเป็น syntax ผิด (เอา selector มาต่อกับ at-rule ในรายการเดียวกันไม่ได้) ทำให้ override ไม่เคยทำงานจริง แต่ไม่มีใครสังเกตเพราะค่าเดิมตั้งต้นด้วย CSS variable ที่บังเอิญให้ผลถูกต้องอยู่แล้ว พอเปลี่ยนเป็นสีคงที่ (`#590000`) บั๊กถึงโผล่ ตอนนี้แก้เป็น 2 กฎแยกกันแล้ว (เหมือน pattern ของ token สีอื่น ๆ ในไฟล์): `@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) ... }` และ `:root[data-theme="dark"] ...` — ถ้าจะเพิ่ม dark-mode override ให้ element ใหม่ในอนาคต ต้องเขียนแยก 2 กฎแบบนี้เสมอ ห้ามรวม selector กับ @media ไว้ในบรรทัดเดียว
 
 ## Do's and Don'ts
