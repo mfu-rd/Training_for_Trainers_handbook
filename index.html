@@ -106,7 +106,13 @@
     display:flex; align-items:center; justify-content:center;
   }
   .theme-toggle:hover{ background:var(--color-surface); }
-  .hamburger{ display:none; }
+  .header-actions{ display:flex; align-items:center; gap:8px; }
+  .hamburger{
+    display:none; width:40px; height:40px; border-radius:var(--radius-full);
+    border:1px solid var(--color-border); background:var(--color-bg); color:var(--color-text);
+    cursor:pointer; font-size:18px; align-items:center; justify-content:center;
+  }
+  .hamburger:hover{ background:var(--color-surface); }
 
   /* Hero */
   .hero{ padding:56px 0 40px; text-align:center; }
@@ -202,7 +208,15 @@
   footer{ padding:32px 0; text-align:center; color:var(--color-text-secondary); font-size:13px; }
 
   @media (max-width: 720px){
-    .nav-links{ display:none; }
+    .nav-links{
+      display:none; position:absolute; top:64px; left:0; right:0;
+      flex-direction:column; gap:2px; background:var(--color-bg);
+      border-radius:0 0 var(--radius-sm) var(--radius-sm);
+      box-shadow:var(--shadow-2); padding:12px; margin:0;
+    }
+    .nav-links a{ display:block; }
+    .site-header.nav-open .nav-links{ display:flex; }
+    .hamburger{ display:flex; }
     .hero h1{ font-size:22px; }
     section{ padding:36px 0; }
   }
@@ -220,7 +234,10 @@
       <li><a href="#announcements">ประกาศ</a></li>
       <li><a href="#contact">ติดต่อ</a></li>
     </ul>
-    <button class="theme-toggle" id="themeToggle" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
+      <button class="hamburger" id="hamburgerBtn" aria-label="เปิดเมนู">☰</button>
+    </div>
   </div>
 </header>
 
@@ -512,6 +529,19 @@
   const header = document.getElementById('site-header');
   window.addEventListener('scroll', () => {
     header.classList.toggle('scrolled', window.scrollY > 4);
+  });
+
+  // mobile hamburger menu
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  hamburgerBtn.addEventListener('click', () => {
+    const open = header.classList.toggle('nav-open');
+    hamburgerBtn.textContent = open ? '✕' : '☰';
+  });
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      header.classList.remove('nav-open');
+      hamburgerBtn.textContent = '☰';
+    });
   });
 
   // day tabs
