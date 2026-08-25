@@ -92,7 +92,8 @@
 - หน่วยฐาน: 8px
 - Scale: 4, 8, 12, 16, 24, 32, 48, 64px
 - Section spacing: 64px ระหว่าง section ใหญ่, 24px ระหว่าง card ในหมวดเดียวกัน
-- Container max width: 960px (เนื้อหาอ่านง่าย ไม่กว้างเกินไปสำหรับข้อความยาว)
+- Container max width: **1200px** (`--container-max`, ปรับจาก 960px เพราะจอกว้างแล้วพื้นที่ข้างซ้าย-ขวาว่างเยอะเกินไป "กระจุกอยู่ตรงกลาง") ใช้ร่วมกันทั้ง `.wrap` (hero/footer) และ `.layout` (sidebar+content)
+- `.layout` มี `padding-top:32px` เว้นระยะจาก hero ด้านบน ไม่ให้ sidebar brand/หัวข้อแรกชิดกับแถบ hero จนเกินไป
 - Card grid gap: 20px
 
 ## Border Radius — เน้นความโค้งมน (เพิ่มจากต้นแบบทุกระดับ)
