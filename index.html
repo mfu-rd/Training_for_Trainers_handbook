@@ -137,8 +137,11 @@
   .chip.static{ cursor:default; }
   button.chip{ cursor:pointer; font-family:var(--font); }
   button.chip:hover{ background:var(--color-surface-hover); }
-  button.chip.active{ background:var(--color-text); color:var(--color-bg); }
-  :root[data-theme="dark"] button.chip.active, @media (prefers-color-scheme:dark){ button.chip.active{ background:#F2F2F2; color:#111; } }
+  button.chip.active{ background:#590000; color:#FFFFFF; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) button.chip.active{ background:#F2F2F2; color:#111111; }
+  }
+  :root[data-theme="dark"] button.chip.active{ background:#F2F2F2; color:#111111; }
 
   /* Badge */
   .badge{
