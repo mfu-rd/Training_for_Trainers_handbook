@@ -8,8 +8,8 @@
 - **Primary Hover** (#CC0000): hover state ของปุ่ม/ลิงก์สีแดง
 - **Secondary** (#065FD4): ลิงก์ในเนื้อหา, ลิงก์อ้างอิงข้ามหน้า
 - **Neutral** (#606060): ข้อความรอง, ไอคอน
-- **Background** (#FFFFFF): พื้นหลังหลัก (light mode)
-- **Surface** (#F2F2F2): พื้นหลังการ์ด/chip/แถบหัวข้อ
+- **Background** (#FBF6F6): พื้นหลังหลัก (light mode) — ขาวอมแดงจาง ๆ (translucent red undertone) ให้ต่างจากการ์ดเล็กน้อยแบบไม่ contrast แรง
+- **Surface** (#F2F2F2): พื้นหลังการ์ด/chip/แถบหัวข้อ — สีเทากลาง ๆ ไม่มีโทนอุ่น ตัดกับพื้นหลังด้วย hue ที่ต่างกันเบา ๆ
 - **Text Primary** (#0F0F0F): หัวข้อ, ชื่อหมวด, เนื้อหาหลัก
 - **Text Secondary** (#606060): วันที่, สถานที่, metadata
 - **Border** (#E5E5E5): เส้นแบ่งตาราง, ขอบการ์ด (ใช้เบามาก)
@@ -18,7 +18,7 @@
 - **Error / Urgent** (#FF0000): ประกาศด่วน, การเปลี่ยนแปลงกะทันหัน
 
 ### Dark mode
-- Background → #111111, Surface → #1E1E1E, Text Primary → #F2F2F2, Text Secondary → #A0A0A0, Border → rgba(255,255,255,0.08)
+- Background → #140D0D (ดำอมแดงจาง ๆ), Surface → #201717 (เทาเข้มอมแดงเล็กน้อย เพื่อให้กลมกลืนกับพื้นหลังแต่ยังแยกออกจากกันได้), Text Primary → #F2F2F2, Text Secondary → #A0A0A0, Border → rgba(255,255,255,0.08)
 
 ## Typography
 - **ฟอนต์เดียวทั้งเว็บ: Prompt** (Google Fonts) — น้ำหนักที่ใช้: 300, 400, 500, 600, 700
