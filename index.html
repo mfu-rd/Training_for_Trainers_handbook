@@ -285,7 +285,7 @@
 <main>
   <section class="hero" style="border-top:none;">
     <div class="wrap">
-      <h1>วิทยากรเพื่อการพัฒนานักวิจัย<br><img src="assets/images/LogoTFT.png" alt="Training for the Trainers (TFT)" style="max-width:320px; width:100%; height:auto; margin-top:8px; vertical-align:middle;"></h1>
+      <h1><span id="heroTitleTh">วิทยากรเพื่อการพัฒนานักวิจัย</span><br><img id="heroLogo" src="assets/images/LogoTFT.png" alt="Training for the Trainers (TFT)" style="height:auto; margin-top:8px; vertical-align:middle;"></h1>
       <p class="lead">สำนักงานการวิจัยแห่งชาติ (วช.) ร่วมกับ มหาวิทยาลัยแม่ฟ้าหลวง<br>28 กันยายน – 2 ตุลาคม 2569 · ณ วนาศรม มหาวิทยาลัยแม่ฟ้าหลวง จังหวัดเชียงราย</p>
       <div class="hero-chips">
         <span class="chip static">🗓️ อบรม 5 วัน</span>
@@ -598,6 +598,16 @@
   window.addEventListener('scroll', () => {
     header.classList.toggle('scrolled', window.scrollY > 4);
   });
+
+  // match hero logo width to the Thai title line above it
+  const heroTitleTh = document.getElementById('heroTitleTh');
+  const heroLogo = document.getElementById('heroLogo');
+  function syncHeroLogoWidth(){
+    heroLogo.style.width = heroTitleTh.getBoundingClientRect().width + 'px';
+  }
+  if (heroLogo.complete) syncHeroLogoWidth();
+  else heroLogo.addEventListener('load', syncHeroLogoWidth);
+  window.addEventListener('resize', syncHeroLogoWidth);
 
   // mobile hamburger menu
   const hamburgerBtn = document.getElementById('hamburgerBtn');
