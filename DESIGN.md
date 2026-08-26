@@ -53,6 +53,7 @@
 
 - **Buttons**
   - Primary: พื้น #0F0F0F (หรือ Primary red สำหรับ CTA เร่งด่วน), ตัวอักษรขาว, สูง 44px, padding แนวนอน 20px, **border-radius 9999px (pill เต็ม)**, Prompt 15px weight 500
+  - Implemented แล้วเป็น `.btn-primary` (ใช้ gradient เดียวกับ hero `linear-gradient(to top, #470303, #A60000)` แทนดำล้วน เพื่อให้เป็น CTA ที่เด่นชัดสอดคล้องกับสี accent ของเว็บ) — ตัวอย่างการใช้งาน: ปุ่ม "เข้าร่วมกลุ่ม LINE" ใน section เตรียมตัว
   - Outline: ขอบ 1.5px #E5E5E5, ตัวอักษร #0F0F0F, พื้นโปร่งใส, radius 9999px, hover เติมพื้น Surface
   - Icon button: วงกลม 40px, โปร่งใส, hover พื้น Surface
 
