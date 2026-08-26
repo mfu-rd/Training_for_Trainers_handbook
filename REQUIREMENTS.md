@@ -62,6 +62,14 @@
 
 ทดสอบผ่านเบราว์เซอร์แล้ว (local http server): chip tab สลับวันทำงานถูกต้อง, ปุ่ม dark/light mode ทำงานถูกต้อง (ต้อง wrap `localStorage` ด้วย try/catch — บาง origin เช่น sandboxed preview บล็อก storage ทำให้ script ทั้งไฟล์ throw ถ้าไม่ wrap), ฟอนต์ Prompt render ภาษาไทยถูกต้องทั้ง light/dark
 
+## รูปภาพ (`assets/images/`)
+
+โฟลเดอร์เก็บไฟล์รูป (เช่น QR code กลุ่ม LINE, โลโก้, ภาพประกอบอื่น ๆ) ใช้ path แบบ `assets/images/ชื่อไฟล์.png` อ้างอิงใน `index.html` ด้วย `<img src="assets/images/ชื่อไฟล์.png">`
+
+**วิธีส่งรูปให้ใส่ในเว็บ:** รูปที่วางแปะ/paste ลงแชทโดยตรงเป็นแค่ inline preview เอาไฟล์จริงไม่ได้ ต้องทำอย่างใดอย่างหนึ่ง:
+1. ลากไฟล์รูป (drag & drop) เข้าไปในหน้าต่างแชท Claude Code แทนการ paste, หรือ
+2. บอก path ไฟล์บนเครื่อง (เช่น `C:\Users\Lenovo\Downloads\line-qr.png`) แล้วให้ก็อปปี้เข้า repo ให้
+
 ## Git / Deploy
 
 - Local repo init แล้ว, remote `origin` → `git@github.com:mfu-rd/Training_for_Trainers_handbook.git`, SSH key ตั้งค่าและใช้งานได้แล้ว
