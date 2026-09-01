@@ -10,6 +10,7 @@
 - [ ] ศึกษาและทำความเข้าใจวัตถุประสงค์ของหลักสูตร โครงสร้างหลักสูตร รายละเอียดแต่ละหมวดวิชา และแบบฟอร์มภาคปฏิบัติล่วงหน้า (ดู[กำหนดการ](02-agenda.md)) พร้อมยอมรับเงื่อนไข/หลักเกณฑ์ที่กำหนด โดยจะไม่มีข้อโต้แย้งในภายหลัง
 - [ ] อ่าน[คู่มือสำหรับผู้เข้าร่วม](https://drive.google.com/file/d/1ov25KR5qf8WH0bShl9Bqz2Kgh7ch33Nx/view?usp=drive_link) ก่อนวันฝึกอบรม
 - [ ] เข้าสอบผ่านระบบ e-learning ของ วช. ที่ [elearning-necast.nrct.go.th](https://elearning-necast.nrct.go.th/) และได้รับ **Certificate of Responsible Conduct of Research (RCR)**
+- [ ] กรอกข้อมูลและปรับปรุงข้อมูลให้เป็นปัจจุบันในระบบข้อมูลสารสนเทศวิจัยและนวัตกรรมแห่งชาติ ([NRIIS](https://nriis.go.th/Login.aspx))
 
 ### ระหว่างการฝึกอบรม
 
