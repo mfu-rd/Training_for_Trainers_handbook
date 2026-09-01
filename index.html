@@ -129,6 +129,13 @@
     font-size:15px; font-weight:500; text-decoration:none; white-space:nowrap;
   }
   .btn-primary:hover{ opacity:0.9; }
+  .btn-outline{
+    display:inline-flex; align-items:center; justify-content:center;
+    height:44px; padding:0 24px; border-radius:var(--radius-full);
+    border:1.5px solid var(--color-border); background:transparent; color:var(--color-text);
+    font-size:15px; font-weight:500; text-decoration:none; white-space:nowrap;
+  }
+  .btn-outline:hover{ background:var(--color-surface); }
 
   /* Sidebar layout (desktop) */
   .layout{
@@ -211,6 +218,15 @@
   .card .meta{ color:var(--color-text-secondary); font-size:13px; margin-bottom:10px; }
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
   .card-grid > .card + .card{ margin-top:0; }
+
+  /* Announcement card — extra emphasis vs. regular info cards */
+  .card-announcement{
+    background:var(--color-error-bg);
+    border:1.5px solid var(--color-primary);
+    box-shadow:var(--shadow-2);
+  }
+  .card-announcement h3{ font-size:20px; }
+  .card-announcement .actions{ display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
 
   /* Checklist */
   ul.checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px; }
@@ -317,21 +333,14 @@
       <h2 class="section-title">ประกาศสำคัญ</h2>
       <p class="section-sub">เรียงจากล่าสุดไปเก่าสุด — อัปเดตเมื่อมีการเปลี่ยนแปลงกำหนดการ เอกสาร หรือข้อมูลอื่น ๆ</p>
 
-      <div class="card">
-        <span class="badge badge-success" style="margin-bottom:10px;">ประกาศผลแล้ว</span>
+      <div class="card card-announcement">
+        <span class="badge badge-error" style="margin-bottom:10px;">ด่วน</span>
         <h3>ประกาศรายชื่อผู้ผ่านการคัดเลือก</h3>
-        <p style="margin:0 0 10px; font-size:14px;"><a href="https://drive.google.com/file/d/1IY2SB8IQFRXDkDKR66kOCYB0TphM1wHS/view" target="_blank" rel="noopener">ดูประกาศรายชื่อผู้ผ่านการคัดเลือก</a></p>
-        <p style="margin:0; font-size:14px;">ขอให้ผู้ผ่านการคัดเลือก<strong>กรอกข้อมูลยืนยันเข้าร่วมกิจกรรมภายในวันที่ 10 กันยายน 2569</strong> ผ่าน<a href="https://forms.gle/trVfPJqJEPiveBUV7" target="_blank" rel="noopener">แบบฟอร์มยืนยันเข้าร่วมกิจกรรม</a></p>
-      </div>
-      <div class="card">
-        <span class="badge badge-warning" style="margin-bottom:10px;">แจ้งเตือน</span>
-        <h3>กำหนดการอาจเปลี่ยนแปลง</h3>
-        <p style="margin:0; font-size:14px;"><a href="#agenda">กำหนดการ</a>ฝึกอบรมอาจมีการปรับเปลี่ยนตามความเหมาะสม โปรดติดตามประกาศล่าสุดในหน้านี้</p>
-      </div>
-      <div class="card">
-        <span class="badge badge-success" style="margin-bottom:10px;">ปิดรับสมัครแล้ว</span>
-        <h3>รับสมัคร</h3>
-        <p style="margin:0; font-size:14px;">เปิดรับสมัครถึงวันที่ 20 สิงหาคม 2569 (ปิดรับสมัครแล้ว)</p>
+        <p style="margin:0; font-size:14px;">ขอให้ผู้ผ่านการคัดเลือก<strong>กรอกข้อมูลยืนยันเข้าร่วมกิจกรรมภายในวันที่ 10 กันยายน 2569</strong></p>
+        <div class="actions">
+          <a href="https://drive.google.com/file/d/1IY2SB8IQFRXDkDKR66kOCYB0TphM1wHS/view" target="_blank" rel="noopener" class="btn-outline">ดูประกาศรายชื่อผู้ผ่านการคัดเลือก</a>
+          <a href="https://forms.gle/trVfPJqJEPiveBUV7" target="_blank" rel="noopener" class="btn-primary">กรอกแบบฟอร์มยืนยันเข้าร่วมกิจกรรม</a>
+        </div>
       </div>
     </div>
   </section>
