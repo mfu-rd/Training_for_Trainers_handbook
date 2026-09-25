@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T08:18:30Z",
+  "title": "Design System: ประมูลของรางวัล — TFT",
+  "extensions": {
+    "colorMeta": {
+      "espresso-black": { "role": "neutral", "displayName": "Espresso Black", "canonical": "#0a0806", "tonalRamp": ["#050403", "#0a0806", "#151210", "#1d1814", "#332a1c", "#5a4a30", "#7a5c1e", "#a88a3f"] },
+      "coffee-bean": { "role": "neutral", "displayName": "Coffee Bean", "canonical": "#151210", "tonalRamp": ["#0a0806", "#151210", "#1d1814", "#2a2219", "#3a3022", "#4a3d2c", "#5c4c37", "#6f5d44"] },
+      "dark-walnut": { "role": "neutral", "displayName": "Dark Walnut", "canonical": "#1d1814", "tonalRamp": ["#100d0a", "#1d1814", "#2a2219", "#3a3022", "#4a3d2c", "#5c4c37", "#6f5d44", "#836e51"] },
+      "antique-gold": { "role": "primary", "displayName": "Antique Gold", "canonical": "#cda94f", "tonalRamp": ["#3a2f14", "#5a4720", "#7a5c1e", "#9c7a2d", "#b8933d", "#cda94f", "#ddc175", "#f0d789"] },
+      "champagne-gold": { "role": "primary", "displayName": "Champagne Gold", "canonical": "#f0d789", "tonalRamp": ["#5a4720", "#7a5c1e", "#9c7a2d", "#b8933d", "#cda94f", "#ddc175", "#f0d789", "#f8e8b8"] },
+      "bronze-shadow": { "role": "primary", "displayName": "Bronze Shadow", "canonical": "#7a5c1e", "tonalRamp": ["#211a0c", "#3a2f14", "#5a4720", "#7a5c1e", "#9c7a2d", "#b8933d", "#cda94f", "#ddc175"] },
+      "warm-ivory": { "role": "neutral", "displayName": "Warm Ivory", "canonical": "#f3ead9", "tonalRamp": ["#7a6f5c", "#96896f", "#b3a488", "#cabca3", "#ded3c1", "#ece1d0", "#f3ead9", "#faf6ee"] },
+      "soft-taupe": { "role": "neutral", "displayName": "Soft Taupe", "canonical": "#a89f8f", "tonalRamp": ["#332e26", "#4c453a", "#665d4e", "#807563", "#998c78", "#a89f8f", "#c2b9ab", "#dcd5c9"] },
+      "muted-ember": { "role": "danger", "displayName": "Muted Ember", "canonical": "#d9564a", "tonalRamp": ["#3a1512", "#5c221c", "#822f27", "#a83c32", "#c74a3e", "#d9564a", "#e37f75", "#eda9a2"] },
+      "sage-green": { "role": "success", "displayName": "Sage Green", "canonical": "#4caf7d", "tonalRamp": ["#132a1e", "#1d422f", "#2b5f44", "#397c59", "#409269", "#4caf7d", "#71c298", "#9bd6b6"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The odometer price digits only — Bahnschrift, flat and unframed after the reset." },
+      "headline": { "displayName": "Headline", "purpose": "Item name on the live auction stage, Thai-safe sans." },
+      "label": { "displayName": "Label", "purpose": "Small uppercase captions and the item-counter badge, Bahnschrift." },
+      "body": { "displayName": "Body", "purpose": "All Operate-mode chrome: admin buttons, list rows, hints, form labels." }
+    },
+    "shadows": [
+      { "name": "object-drop-shadow", "value": "drop-shadow(0 26px 30px rgba(0,0,0,.5))", "purpose": "The system's one real shadow — a CSS filter (not box-shadow) applied directly to the item photo so it traces the object's own silhouette, grounding it on the stage without a card." },
+      { "name": "price-grounding", "value": "0 4px 16px rgba(0,0,0,.5)", "purpose": "Offset text-shadow under the price digits; grounding, not a glow." }
+    ],
+    "motion": [
+      { "name": "odo-roll", "value": "cubic-bezier(.2,.75,.15,1.1)", "purpose": "Digit-roll transitions on the price odometer; slight overshoot on landing. Retained unchanged across the reset." },
+      { "name": "plate-enter", "value": "cubic-bezier(.2,.7,.22,1.05)", "purpose": "Showcase plate's entrance when switching to a new item." },
+      { "name": "gavel-strike", "value": "cubic-bezier(.3,.55,.2,1)", "purpose": "The large (up to 220px) gavel's wind-up-and-strike over 0.6s; impact lands at ~55-68%, cueing sound/flash/a scale-and-glow pulse on the price numerals/confetti and the name-capture field." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "760px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Admin-screen only (setup/summary). Never appears on the live stage.",
+      "html": "<button class=\"ds-btn-primary\">เพิ่มรายการ</button>",
+      "css": ".ds-btn-primary { background: #cda94f; color: #26210b; font-weight: 700; border: 1px solid #cda94f; border-radius: 999px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: background 0.15s; } .ds-btn-primary:hover { background: #f0d789; } .ds-btn-primary:focus-visible { outline: 2px solid #cda94f; outline-offset: 2px; }"
+    },
+    {
+      "name": "Item Row Card",
+      "kind": "card",
+      "refersTo": "item-row",
+      "description": "Setup-screen list row: thumbnail, name, price meta, reorder/delete controls.",
+      "html": "<div class=\"ds-item-row\"><div class=\"ds-item-thumb\">🧸</div><div class=\"ds-item-info\"><div class=\"ds-item-name\">ตุ๊กตาหมี</div><div class=\"ds-item-meta\">เริ่ม 100 Token · เพิ่มทีละ 50 Token</div></div></div>",
+      "css": ".ds-item-row { display: flex; align-items: center; gap: 12px; background: #1d1814; border: 1px solid rgba(205,169,79,.16); border-radius: 14px; padding: 10px 12px; } .ds-item-thumb { width: 56px; height: 56px; border-radius: 10px; background: #151210; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 1px solid rgba(205,169,79,.16); } .ds-item-name { font-weight: 700; color: #f3ead9; } .ds-item-meta { font-size: 12px; color: #a89f8f; }"
+    },
+    {
+      "name": "Object on Stage",
+      "kind": "custom",
+      "refersTo": "object-on-stage",
+      "description": "Signature component (corrected): no card, no border, no background — the item photo (transparent PNG) floats directly on the stage, grounded by its own silhouette-following drop-shadow. Replaces an earlier bordered/backgrounded plate that still read as a picture in a frame.",
+      "html": "<div class=\"ds-stage-spot\"><img class=\"ds-object\" src=\"item.png\" alt=\"\"><div class=\"ds-counter-badge\">2 / 4</div></div>",
+      "css": ".ds-stage-spot { width: 320px; aspect-ratio: 1/1; position: relative; display: flex; align-items: center; justify-content: center; } .ds-object { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0 26px 30px rgba(0,0,0,.5)); } .ds-counter-badge { position: absolute; top: 0; right: 0; background: rgba(10,8,6,.62); border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 7px 14px; font-family: 'Bahnschrift','Segoe UI',sans-serif; font-size: 13px; color: #f3ead9; }"
+    },
+    {
+      "name": "Keyboard Legend",
+      "kind": "custom",
+      "refersTo": "kbd-legend",
+      "description": "Signature component (new): the live stage's entire instruction set and entire chrome — no button row, no icon toolbar.",
+      "html": "<div class=\"ds-legend\"><span><kbd class=\"ds-kbd\">&larr;</kbd><kbd class=\"ds-kbd\">&rarr;</kbd> เปลี่ยนชิ้น</span><span><kbd class=\"ds-kbd\">&uarr;</kbd><kbd class=\"ds-kbd\">&darr;</kbd> ปรับ Token</span><span><kbd class=\"ds-kbd\">Enter</kbd> เคาะ</span></div>",
+      "css": ".ds-legend { display: flex; gap: 28px; align-items: center; justify-content: center; flex-wrap: wrap; } .ds-legend span { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #a89f8f; } .ds-kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border: 1px solid rgba(255,255,255,.14); border-radius: 6px; font-family: 'Bahnschrift','Segoe UI',sans-serif; font-size: 11px; color: #f3ead9; background: rgba(255,255,255,.04); }"
+    },
+    {
+      "name": "Inline Name Capture",
+      "kind": "input",
+      "refersTo": "name-capture",
+      "description": "Signature component (new): replaces the prior button-driven confirm modal. Borderless, underlined, keyboard-only (Enter confirms, Escape cancels).",
+      "html": "<div class=\"ds-capture\"><div class=\"ds-capture-price\">เคาะที่ 150 Token</div><label class=\"ds-capture-label\">หมายเลขผู้ชนะ — พิมพ์แล้วกด Enter (Esc ยกเลิก)</label><input class=\"ds-capture-input\"></div>",
+      "css": ".ds-capture { display: flex; flex-direction: column; gap: 8px; } .ds-capture-label { font-size: 12px; color: #a89f8f; letter-spacing: .04em; } .ds-capture-input { background: transparent; border: none; border-bottom: 1px solid #cda94f; color: #f3ead9; font-size: 20px; padding: 4px 2px; width: 100%; } .ds-capture-input:focus { outline: none; border-bottom-color: #f0d789; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Silent Rostrum",
+    "overview": "Two rooms, one palette. The MC's admin screens (setup, summary) stay an ordinary dark-gold operator tool — buttons, list rows, forms — because that work is done alone, at a desk, before the room is watching. The live auction stage is a different room entirely: a rostrum the MC controls in total silence, no button anywhere on it, because the moment it is live, every click would be a click the room can see. The keyboard is the only instrument; the object and its number are the only thing on screen.\n\nThis is a hard reset of that one screen, not a polish pass — it replaces the previous \"Gilded Gavel\" world's framed coin-tile digits, portrait spotlight frame, and on-screen bid/SOLD buttons outright, built directly from the user's own pinned reference (a dark-luxury antiquities/jewelry auction app) and their explicit brief: no clickable control anywhere on the stage, arrow keys move and bid, Enter strikes.",
+    "keyCharacteristics": [
+      "Two visitor modes sharing one palette: Operate (setup/summary) and Experience (the live stage, keyboard-only)",
+      "Warm near-black, never cool navy or pure #000",
+      "One accent metal (antique gold), now rendered flat — no per-digit frames, no boxed tiles",
+      "A geometric grotesk (Bahnschrift) carries every number and Latin label; Thai copy stays in the Sarabun-safe sans",
+      "The digit-roll price ticker survives the reset as the system's one continuous signature motion, restyled unframed",
+      "Sage green is confined to the admin screens' sold badge; the live stage marks a sale in champagne gold, so nothing but gold ever appears on the stage"
+    ],
+    "rules": [
+      { "name": "The One Green Rule", "body": "Sage green exists in exactly one place: the admin screens' sold badge (Operate mode). It never appears on the live stage, never becomes a secondary accent, and never becomes a hover state; the stage's own sold confirmation uses champagne gold instead.", "section": "colors" },
+      { "name": "The No-Glow Rule", "body": "Gold never halos. Emphasis on the price comes from size and weight, plus a real offset-and-blur shadow, never a symmetric colored glow.", "section": "colors" },
+      { "name": "The Split-Script Rule", "body": "Bahnschrift sets everything Latin or numeral; the moment Thai text appears it drops to the Sarabun-safe stack. Neither font renders a script it wasn't chosen for.", "section": "typography" },
+      { "name": "The One Shadow Rule", "body": "Exactly one thing casts a real shadow: the item photo itself, via a drop-shadow filter tracing its own silhouette. Corrected from an earlier draft that put this shadow on a bordered card behind the photo, which still read as a picture in a frame. Every other surface separates with a gold hairline border instead.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the live stage free of every clickable control — no button, no icon toolbar, no modal with Cancel/Confirm.",
+      "Do keep gold as the only accent metal, in both rooms.",
+      "Do keep sage green confined to the admin screens' sold badge only; the live stage's sold moment stays in champagne gold.",
+      "Do set every number and Latin label in Bahnschrift; Thai text drops to the Sarabun-safe sans.",
+      "Do keep the item photo's own drop-shadow as the system's only shadow; never wrap it in a bordered or backgrounded card.",
+      "Do draw new icons as single-stroke inline SVG in the gold/ivory palette. Never substitute an emoji for interface chrome.",
+      "Do guard every live-stage keyboard action against pendingStrike, so a stray key during name-capture can't bid or navigate underneath it."
+    ],
+    "donts": [
+      "Don't put a button, link, or clickable icon anywhere on the live stage.",
+      "Don't add a glow/halo around gold text or borders.",
+      "Don't use gradient text for the price or any other emphasis.",
+      "Don't reintroduce the coin-tile framed digit.",
+      "Don't put a border, background, or box-shadow behind the item photo — it floats directly on the stage, grounded only by its own drop-shadow.",
+      "Don't reintroduce cool navy or blue-black anywhere.",
+      "Don't give the setup/summary administrative screens the live stage's full-bleed, keyboard-only treatment."
+    ]
+  }
+}
