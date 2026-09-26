@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ภาพรวมแอดมิน — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-admin">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token TFT</span>
+  <nav class="nav-chips">
+    <a class="nav-chip active" href="admin-overview.html">ภาพรวม</a>
+    <a class="nav-chip" href="deduct.html">หัก Token</a>
+    <a class="nav-chip" href="transactions.html">รายการ</a>
+    <a class="nav-chip" href="trainer-quota.html">โควตาวิทยากร</a>
+    <a class="nav-chip" href="user-management.html">จัดการบัญชี</a>
+    <a class="nav-chip" href="export.html">Export</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="logout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-data">
+  <div class="stack">
+    <header>
+      <span class="label">Admin</span>
+      <h1 class="headline">ภาพรวมแอดมิน</h1>
+      <p class="muted" style="margin:var(--s-xs) 0 0">ยอด token ของผู้เข้าร่วมทุกคน และโควตาคงเหลือของวิทยากรทุกคน</p>
+    </header>
+
+    <div id="offline-banner" class="msg msg-warn hidden" role="status">
+      ขาดการเชื่อมต่ออินเทอร์เน็ต — ข้อมูลที่แสดงอาจไม่เป็นปัจจุบัน กรุณาตรวจสอบสัญญาณแล้วรีเฟรชหน้านี้
+    </div>
+
+    <div id="status" class="loading"></div>
+
+    <section id="participants-section" class="card card-vivid hidden">
+      <div class="card-band card-band-mint row-between">
+        <span class="label" style="margin:0">ผู้เข้าร่วม</span>
+        <span class="num" id="participants-count"></span>
+      </div>
+      <div class="card-vivid-body">
+        <div id="participants-wrap"></div>
+      </div>
+    </section>
+
+    <section id="trainers-section" class="card card-vivid hidden">
+      <div class="card-band card-band-quota row-between">
+        <span class="label" style="margin:0">วิทยากร / ผู้ดูแลกลุ่ม</span>
+        <span class="num" id="trainers-count"></span>
+      </div>
+      <div class="card-vivid-body">
+        <div id="trainers-wrap"></div>
+      </div>
+    </section>
+
+    <section id="admins-section" class="card card-vivid hidden">
+      <div class="card-band card-band-admin row-between">
+        <span class="label" style="margin:0">แอดมิน</span>
+        <span class="num" id="admins-count"></span>
+      </div>
+      <div class="card-vivid-body">
+        <div id="admins-wrap"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { listAllUsers } from './shared/data.js';
+import { toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์ และรอ Firebase resolve auth ให้เรียบร้อยก่อน
+const { authUser, profile } = await requireRole(['admin']);
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+/* สถานะออฟไลน์ — ห้องบรรยายเน็ตไม่แน่นอน (SCOPE.md) */
+const offlineBanner = document.getElementById('offline-banner');
+function updateOnlineStatus() {
+  offlineBanner.classList.toggle('hidden', navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+const statusEl = document.getElementById('status');
+
+const sections = {
+  participant: {
+    section: document.getElementById('participants-section'),
+    wrap: document.getElementById('participants-wrap'),
+    count: document.getElementById('participants-count'),
+    numLabel: 'ยอดคงเหลือ',
+    numKey: 'tokenBalance',
+    emptyText: 'ยังไม่มีผู้เข้าร่วมในระบบ'
+  },
+  trainer: {
+    section: document.getElementById('trainers-section'),
+    wrap: document.getElementById('trainers-wrap'),
+    count: document.getElementById('trainers-count'),
+    numLabel: 'โควตาคงเหลือ',
+    numKey: 'tokenQuota',
+    emptyText: 'ยังไม่มีวิทยากรในระบบ'
+  },
+  admin: {
+    section: document.getElementById('admins-section'),
+    wrap: document.getElementById('admins-wrap'),
+    count: document.getElementById('admins-count'),
+    numLabel: null,
+    numKey: null,
+    emptyText: 'ยังไม่มีแอดมินในระบบ'
+  }
+};
+
+function renderGroup(role, users) {
+  const cfg = sections[role];
+  cfg.section.classList.remove('hidden');
+  cfg.count.textContent = `${users.length} คน`;
+  cfg.wrap.textContent = '';
+
+  if (users.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = cfg.emptyText;
+    cfg.wrap.appendChild(empty);
+    return;
+  }
+
+  const tableWrap = document.createElement('div');
+  tableWrap.className = 'table-wrap';
+
+  const table = document.createElement('table');
+  table.className = 'table';
+
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  const thName = document.createElement('th');
+  thName.textContent = 'ชื่อ-นามสกุล';
+  const thUsername = document.createElement('th');
+  thUsername.textContent = 'รหัสประจำตัว';
+  headRow.append(thName, thUsername);
+  if (cfg.numKey) {
+    const thNum = document.createElement('th');
+    thNum.className = 'col-num';
+    thNum.textContent = cfg.numLabel;
+    headRow.appendChild(thNum);
+  }
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  for (const u of users) {
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td');
+    tdName.textContent = u.fullName || '—';
+    const tdUsername = document.createElement('td');
+    tdUsername.textContent = u.username ? toShortCode(u.username) : '—';
+    tr.append(tdName, tdUsername);
+    if (cfg.numKey) {
+      const tdNum = document.createElement('td');
+      tdNum.className = 'col-num num';
+      tdNum.textContent = String(u[cfg.numKey] ?? 0);
+      tr.appendChild(tdNum);
+    }
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  cfg.wrap.appendChild(tableWrap);
+}
+
+async function load() {
+  statusEl.textContent = 'กำลังโหลดข้อมูล...';
+  statusEl.className = 'loading';
+  for (const cfg of Object.values(sections)) cfg.section.classList.add('hidden');
+
+  try {
+    const users = await listAllUsers();
+    statusEl.textContent = '';
+    statusEl.className = '';
+
+    if (users.length === 0) {
+      statusEl.className = 'empty';
+      statusEl.textContent = 'ยังไม่มีบัญชีผู้ใช้ในระบบเลย';
+      return;
+    }
+
+    renderGroup('participant', users.filter((u) => u.role === 'participant'));
+    renderGroup('trainer', users.filter((u) => u.role === 'trainer'));
+    renderGroup('admin', users.filter((u) => u.role === 'admin'));
+  } catch (e) {
+    statusEl.className = 'msg msg-error';
+    statusEl.textContent = e.message || 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>

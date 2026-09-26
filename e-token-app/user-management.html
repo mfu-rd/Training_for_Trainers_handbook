@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการบัญชีผู้ใช้ — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+<style>
+  /* กล่องคำแนะนำแบบ modal สำหรับ "รีเซ็ตรหัสผ่าน" — ไม่มีคอมโพเนนต์ modal สำเร็จรูปใน styles.css
+     จึงประกอบจากคลาสที่มีอยู่แล้ว (.card ฯลฯ) เท่านั้น ฉากหลังใช้ color-mix() บนโทเคนเดิม (--void-plum)
+     ตามรูปแบบที่ styles.css ใช้อยู่แล้วสำหรับความโปร่งใส ไม่ได้เพิ่มสีใหม่ */
+  .modal-scrim {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--void-plum) 80%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s-md);
+    z-index: 50;
+  }
+  .modal-panel {
+    max-width: 560px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  /* สลิปรหัสผ่านแบบพิมพ์ได้ — คงคอลัมน์ hairline/card เดิม แค่จัดวางให้อ่านง่ายเป็นทางการ */
+  .slip-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--s-xs) var(--s-md);
+  }
+  .slip-row dt {
+    color: var(--text-secondary);
+  }
+  .slip-row dd {
+    margin: 0;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body class="accent-admin">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token TFT</span>
+  <nav class="nav-chips">
+    <a class="nav-chip" href="admin-overview.html">ภาพรวม</a>
+    <a class="nav-chip" href="deduct.html">หัก Token</a>
+    <a class="nav-chip" href="transactions.html">รายการ</a>
+    <a class="nav-chip" href="trainer-quota.html">โควตาวิทยากร</a>
+    <a class="nav-chip active" href="user-management.html">จัดการบัญชี</a>
+    <a class="nav-chip" href="export.html">Export</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="logout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-data">
+  <div class="stack">
+    <header>
+      <span class="label">Admin</span>
+      <h1 class="headline">จัดการบัญชีผู้ใช้</h1>
+      <p class="muted" style="margin:var(--s-xs) 0 0">สร้างบัญชีใหม่ (รหัสประจำตัวเลข 01–80) และดูรายชื่อบัญชีทั้งหมด</p>
+    </header>
+
+    <div id="offline-banner" class="msg msg-warn hidden" role="status">
+      ขาดการเชื่อมต่ออินเทอร์เน็ต — ข้อมูลที่แสดงอาจไม่เป็นปัจจุบัน กรุณาตรวจสอบสัญญาณแล้วรีเฟรชหน้านี้
+    </div>
+
+    <!-- ===================== สร้างบัญชีใหม่ ===================== -->
+    <section class="card" style="max-width:var(--w-form); width:100%; margin:0 auto">
+      <h2 class="headline" style="font-size:22px">สร้างบัญชีใหม่</h2>
+
+      <form id="create-form" class="layout-form" style="padding:var(--s-md) 0 0; max-width:none" novalidate>
+        <div class="field">
+          <label class="label" for="new-username">รหัสประจำตัว (เลข 2 หลัก)</label>
+          <input class="input" id="new-username" name="username" type="text"
+                 inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2"
+                 autocomplete="off" autocapitalize="off" spellcheck="false"
+                 placeholder="เช่น 42" required>
+          <span class="hint">ต้องเป็นตัวเลข 01–80 เท่านั้น</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="new-fullname">ชื่อ-นามสกุล</label>
+          <input class="input" id="new-fullname" name="fullName" type="text"
+                 autocomplete="off" placeholder="เช่น สมชาย ใจดี" required>
+        </div>
+
+        <div class="field">
+          <label class="label" for="new-role">บทบาท</label>
+          <select class="input" id="new-role" name="role" required>
+            <option value="participant">ผู้เข้าร่วม (participant)</option>
+            <option value="trainer">วิทยากร (trainer)</option>
+            <option value="admin">แอดมิน (admin)</option>
+          </select>
+        </div>
+
+        <div id="create-error" class="msg msg-error" role="alert" aria-live="polite"></div>
+
+        <div class="action-isolated">
+          <button class="btn btn-admin btn-block" id="create-submit" type="submit">สร้างบัญชี</button>
+        </div>
+      </form>
+
+      <!-- สลิปรหัสผ่าน — โชว์ครั้งเดียวหลังสร้างบัญชีสำเร็จ เพื่อคัดลอก/พิมพ์ให้เจ้าของบัญชีคนนั้น -->
+      <div id="slip" class="card card-tight hidden" style="margin-top:var(--s-lg); border-color:var(--accent)">
+        <span class="label" style="margin:0 0 var(--s-sm)">สลิปรหัสผ่าน — มอบให้ผู้ใช้คนนี้เท่านั้น</span>
+        <dl class="slip-row">
+          <dt>เลขที่</dt><dd id="slip-no"></dd>
+          <dt>ชื่อ-นามสกุล</dt><dd id="slip-fullname"></dd>
+          <dt>Username</dt><dd id="slip-username"></dd>
+          <dt>Password</dt><dd id="slip-password"></dd>
+        </dl>
+        <div class="msg msg-warn" style="margin-top:var(--s-md)">
+          รหัสผ่านนี้เป็นรหัสชั่วคราว ห้ามใช้รหัสผ่านส่วนตัวหรือรหัสที่ใช้ซ้ำกับบัญชีอื่นเด็ดขาด
+          กรุณาเปลี่ยนรหัสผ่านทันทีหลังเข้าสู่ระบบครั้งแรก
+        </div>
+        <div class="row" style="margin-top:var(--s-md)">
+          <button class="btn" id="slip-print-btn" type="button">พิมพ์สลิปนี้</button>
+          <button class="btn" id="slip-dismiss-btn" type="button">ปิด</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== รายชื่อบัญชีทั้งหมด ===================== -->
+    <section class="card">
+      <div class="row-between" style="margin-bottom:var(--s-sm)">
+        <span class="label" style="margin:0">บัญชีทั้งหมด</span>
+        <span class="muted num" id="accounts-count"></span>
+      </div>
+      <div id="accounts-status" class="loading"></div>
+      <div id="accounts-wrap"></div>
+    </section>
+  </div>
+</main>
+
+<!-- โมดัลคำแนะนำการรีเซ็ตรหัสผ่าน — README ข้อ 6: NOT_IMPLEMENTED เป็นข้อจำกัดจริง ไม่ใช่บั๊ก -->
+<div id="reset-modal" class="modal-scrim hidden" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title">
+  <div class="card modal-panel">
+    <span class="label">รีเซ็ตรหัสผ่าน</span>
+    <h2 class="headline" id="reset-modal-title" style="font-size:22px">ทำผ่านหน้านี้ไม่ได้ — ต้องทำที่ Firebase Console</h2>
+    <p class="body" id="reset-modal-body" style="margin-top:var(--s-md)"></p>
+    <div class="action-isolated" style="margin-top:var(--s-lg)">
+      <button class="btn btn-admin btn-block" id="reset-modal-close" type="button">เข้าใจแล้ว</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { listAllUsers, createAccount, resetPassword, generateTempPassword } from './shared/data.js';
+import { toFullUsername, toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์ และรอ Firebase resolve auth ให้เรียบร้อยก่อน
+const { authUser, profile } = await requireRole(['admin']);
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+/* สถานะออฟไลน์ — ห้องบรรยายเน็ตไม่แน่นอน (SCOPE.md) */
+const offlineBanner = document.getElementById('offline-banner');
+function updateOnlineStatus() {
+  offlineBanner.classList.toggle('hidden', navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+/* --------------------------------------------------------------- *
+ * สร้างบัญชีใหม่
+ * --------------------------------------------------------------- */
+const SHORT_CODE_PATTERN = /^(0[1-9]|[1-7][0-9]|80)$/; // 01–80 ตาม SCOPE.md (เก็บจริงเป็น tft01–tft80)
+
+const createForm = document.getElementById('create-form');
+const usernameEl = document.getElementById('new-username');
+const fullNameEl = document.getElementById('new-fullname');
+const roleEl = document.getElementById('new-role');
+const createErrorEl = document.getElementById('create-error');
+const createSubmitEl = document.getElementById('create-submit');
+
+const slipEl = document.getElementById('slip');
+const slipNoEl = document.getElementById('slip-no');
+const slipFullNameEl = document.getElementById('slip-fullname');
+const slipUsernameEl = document.getElementById('slip-username');
+const slipPasswordEl = document.getElementById('slip-password');
+
+let slipCounter = 0; // เลขที่สลิป — นับต่อเนื่องแค่ในเซสชันนี้ (ไม่มีการเก็บลำดับรวมทั้งงานใน Firestore)
+
+document.getElementById('slip-dismiss-btn').addEventListener('click', () => {
+  slipEl.classList.add('hidden');
+});
+document.getElementById('slip-print-btn').addEventListener('click', () => {
+  window.print();
+});
+
+createForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  createErrorEl.textContent = '';
+
+  const shortCode = usernameEl.value.trim().padStart(2, '0');
+  const username = toFullUsername(shortCode);
+  const fullName = fullNameEl.value.trim();
+  const role = roleEl.value;
+
+  if (!SHORT_CODE_PATTERN.test(shortCode)) {
+    createErrorEl.textContent = 'รหัสประจำตัวต้องเป็นตัวเลข 01–80 เท่านั้น (เช่น 01, 42, 80)';
+    usernameEl.focus();
+    return;
+  }
+  if (!fullName) {
+    createErrorEl.textContent = 'กรุณากรอกชื่อ-นามสกุล';
+    fullNameEl.focus();
+    return;
+  }
+
+  const tempPassword = generateTempPassword();
+
+  createSubmitEl.disabled = true;
+  createSubmitEl.textContent = 'กำลังสร้างบัญชี...';
+
+  try {
+    const result = await createAccount({ username, fullName, role, tempPassword });
+
+    slipCounter += 1;
+    slipNoEl.textContent = String(slipCounter);
+    slipFullNameEl.textContent = fullName;
+    slipUsernameEl.textContent = toShortCode(result.username);
+    slipPasswordEl.textContent = tempPassword;
+    slipEl.classList.remove('hidden');
+    slipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    createForm.reset();
+    await loadAccounts();
+  } catch (err) {
+    createErrorEl.textContent = err.message || 'สร้างบัญชีไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+  } finally {
+    createSubmitEl.disabled = false;
+    createSubmitEl.textContent = 'สร้างบัญชี';
+  }
+});
+
+/* --------------------------------------------------------------- *
+ * โมดัลคำแนะนำรีเซ็ตรหัสผ่าน (README ข้อ 6)
+ * --------------------------------------------------------------- */
+const resetModal = document.getElementById('reset-modal');
+const resetModalBody = document.getElementById('reset-modal-body');
+
+function showInstructionModal(message) {
+  resetModalBody.textContent = message;
+  resetModal.classList.remove('hidden');
+  document.getElementById('reset-modal-close').focus();
+}
+function hideInstructionModal() {
+  resetModal.classList.add('hidden');
+}
+document.getElementById('reset-modal-close').addEventListener('click', hideInstructionModal);
+resetModal.addEventListener('click', (e) => {
+  if (e.target === resetModal) hideInstructionModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !resetModal.classList.contains('hidden')) hideInstructionModal();
+});
+
+async function handleResetClick(user, btn) {
+  btn.disabled = true;
+  btn.textContent = 'กำลังตรวจสอบ...';
+  const newTempPassword = generateTempPassword();
+  try {
+    await resetPassword({ username: user.username, newTempPassword });
+    // ฟังก์ชันนี้ throw เสมอ (README ข้อ 6) — โค้ดบรรทัดนี้จึงไม่ควรถูกรันจริง
+  } catch (err) {
+    if (err.code === 'NOT_IMPLEMENTED') {
+      showInstructionModal(err.message);
+    } else {
+      showInstructionModal(err.message || 'รีเซ็ตรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'รีเซ็ตรหัสผ่าน';
+  }
+}
+
+/* --------------------------------------------------------------- *
+ * รายชื่อบัญชีทั้งหมด
+ * --------------------------------------------------------------- */
+const accountsStatusEl = document.getElementById('accounts-status');
+const accountsWrapEl = document.getElementById('accounts-wrap');
+const accountsCountEl = document.getElementById('accounts-count');
+
+const ROLE_LABEL = { participant: 'ผู้เข้าร่วม', trainer: 'วิทยากร', admin: 'แอดมิน' };
+
+async function loadAccounts() {
+  accountsStatusEl.textContent = 'กำลังโหลดข้อมูล...';
+  accountsStatusEl.className = 'loading';
+  accountsWrapEl.textContent = '';
+
+  try {
+    const users = await listAllUsers();
+    accountsStatusEl.textContent = '';
+    accountsStatusEl.className = '';
+    accountsCountEl.textContent = `${users.length} บัญชี`;
+
+    if (users.length === 0) {
+      accountsStatusEl.className = 'empty';
+      accountsStatusEl.textContent = 'ยังไม่มีบัญชีผู้ใช้ในระบบเลย';
+      return;
+    }
+
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-wrap';
+    const table = document.createElement('table');
+    table.className = 'table';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML =
+      '<tr><th>ชื่อ-นามสกุล</th><th>Username</th><th>บทบาท</th><th></th></tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    for (const u of users) {
+      const tr = document.createElement('tr');
+
+      const tdName = document.createElement('td');
+      tdName.textContent = u.fullName || '—';
+
+      const tdUsername = document.createElement('td');
+      tdUsername.textContent = u.username ? toShortCode(u.username) : '—';
+
+      const tdRole = document.createElement('td');
+      const pill = document.createElement('span');
+      pill.className = 'pill pill-admin';
+      pill.textContent = ROLE_LABEL[u.role] || u.role || '—';
+      tdRole.appendChild(pill);
+
+      const tdAction = document.createElement('td');
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'btn';
+      resetBtn.type = 'button';
+      resetBtn.textContent = 'รีเซ็ตรหัสผ่าน';
+      resetBtn.addEventListener('click', () => handleResetClick(u, resetBtn));
+      tdAction.appendChild(resetBtn);
+
+      tr.append(tdName, tdUsername, tdRole, tdAction);
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    accountsWrapEl.appendChild(tableWrap);
+  } catch (e) {
+    accountsStatusEl.className = 'msg msg-error';
+    accountsStatusEl.textContent = e.message || 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+  }
+}
+
+loadAccounts();
+</script>
+
+</body>
+</html>

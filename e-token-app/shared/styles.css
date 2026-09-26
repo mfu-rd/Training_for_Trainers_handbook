@@ -1,0 +1,903 @@
+/* =====================================================================
+   styles.css — ระบบดีไซน์ของ "ระบบแจก e-Token — TFT"
+   implement ตาม e-token-app/DESIGN.md ทุกโทเคนและทุกคอมโพเนนต์
+   ---------------------------------------------------------------------
+   กฎสำคัญที่สุดของไฟล์นี้: One Color, One Meaning
+     mint (#3fe0ae)   = แจก (grant)          เท่านั้น
+     danger (#ff7a88) = หัก (deduct)         เท่านั้น
+     amber (#ffd66b)  = โควตา (quota)        เท่านั้น
+     pink (#ff6b9e)   = ระบบ/แอดมิน (system) เท่านั้น
+     sun (#ffd23f)    = ตกแต่ง เฉพาะหน้า participant.html เท่านั้น
+   ห้ามคิดสีใหม่ขึ้นมาเอง ห้ามยืมสีของหน้าอื่นมาใช้ตกแต่ง
+   ---------------------------------------------------------------------
+   ที่มาโทนสี/ฟอนต์: หยิบมาจาก design.md ของโปรเจกต์ "Hybrid Buddy Board"
+   (คนละระบบ ใช้แค่โทนสี/ฟอนต์ ไม่เอา component ของ Buddy Board มาด้วย)
+   ใช้เฉพาะค่าธีมมืดของไฟล์นั้น เพราะ e-token-app ยังคงคอมมิตธีมมืดอย่างเดียว
+   สีของฝั่ง online/onsite ในไฟล์ต้นทางถูกสงวนไว้เฉพาะเรื่องฝั่งเท่านั้น
+   จึงไม่ถูกหยิบมาใช้ที่นี่เลย (ไม่เกี่ยวกับความหมายของระบบนี้)
+   ---------------------------------------------------------------------
+   ฟอนต์: ไฟล์นี้ @import Mitr + Anuphan + Space Mono ให้เรียบร้อยแล้ว
+   แต่เพื่อความเร็ว แนะนำให้ใส่ <link> preconnect ใน <head> ของทุกหน้าด้วย
+   (ดูตัวอย่างใน shared/README.md หัวข้อ "โครงหน้า HTML มาตรฐาน")
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+/* ---------------------------------------------------------------
+   1. Design tokens
+   --------------------------------------------------------------- */
+:root {
+  /* สี — semantic ไม่ใช่ของตกแต่ง (ค่าธีมมืดจาก Hybrid Buddy Board design.md — ดูโหมดสว่างท้ายไฟล์) */
+  --void-plum: #16152e;
+  --card-plum: #211f45;
+  --raised-plum: #2a2855;
+  --text-primary: #f3f2ff;
+  --text-secondary: #b6b3de;
+
+  /* --tint = สีที่ใช้ผสมแบบโปร่งแสงสำหรับเส้นขอบ/พื้นจาง ๆ/hover ทั่วทั้งไฟล์
+     ธีมมืด = ขาว (ผสมแล้วสว่างขึ้น), ธีมสว่าง = ดำ (ผสมแล้วเข้มขึ้น) — พลิกค่าเดียว
+     ทุกจุดที่ใช้ color-mix(var(--tint)) จะถูกต้องอัตโนมัติทั้งสองธีมโดยไม่ต้อง override ซ้ำ */
+  --tint: #ffffff;
+  --hairline: color-mix(in srgb, var(--tint) 12%, transparent);
+
+  --mint-grant: #3fe0ae;
+  --mint-grant-lit: color-mix(in srgb, var(--mint-grant) 80%, var(--tint) 20%);
+  --mint-ink: #0b241f; /* สีตัวอักษรบนพื้น mint — เข้มพอทั้งสองธีมเพราะ mint ยังเป็นโทนสว่าง-กลางทั้งคู่ */
+
+  --danger-deduct: #ff7a88;
+  --danger-deduct-lit: color-mix(in srgb, var(--danger-deduct) 80%, var(--tint) 20%);
+  --danger-ink: #2c0a0d; /* ธีมสว่าง override เป็นขาว เพราะ danger ธีมสว่างเข้มกว่านี้มาก */
+
+  --amber-quota: #ffd66b;
+  --amber-quota-lit: color-mix(in srgb, var(--amber-quota) 80%, var(--tint) 20%);
+  --amber-ink: #2b2005; /* ธีมสว่าง override เป็นขาว ด้วยเหตุผลเดียวกับ danger */
+
+  --pink-admin: #ff6b9e;
+  --pink-admin-lit: color-mix(in srgb, var(--pink-admin) 80%, var(--tint) 20%);
+  --pink-ink: #2c0b18; /* ธีมสว่าง override เป็นขาว ด้วยเหตุผลเดียวกับ danger */
+
+  --sun-decor: #ffd23f; /* ตกแต่งเท่านั้น — participant.html เท่านั้น (ค่าเดียวกันทั้งสองธีมตามต้นฉบับ) */
+  --sun-decor-ink: #1b1a3a;
+
+  /* มุมโค้ง */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* ระยะห่าง (จังหวะ 8px) */
+  --s-xs: 8px;
+  --s-sm: 12px;
+  --s-md: 16px;
+  --s-lg: 24px;
+  --s-xl: 32px;
+  --s-xxl: 48px;
+
+  /* ความกว้างคอลัมน์สองแบบตาม DESIGN.md */
+  --w-form: 720px;
+  --w-data: 1100px;
+
+  /* ตัวอักษร — สามบทบาทตาม design.md ต้นทาง: Mitr (หัวข้อ) / Anuphan (เนื้อหา) / Space Mono (ตัวเลข) */
+  --font: 'Anuphan', 'Noto Sans Thai', system-ui, sans-serif;
+  --font-display: 'Mitr', 'Noto Sans Thai', system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'Noto Sans Thai', monospace;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --accent* = "สีประจำหน้าจอ" ตั้งค่าโดยคลาส .accent-* ที่ <body>
+     ค่าเริ่มต้นเป็น pink (system chrome) สำหรับหน้าที่ไม่ใช่หน้า action */
+  --accent: var(--pink-admin);
+  --accent-lit: var(--pink-admin-lit);
+  --accent-ink: var(--pink-ink);
+
+  font-family: var(--font);
+}
+
+/* สีประจำหน้าจอ — ใส่ที่ <body class="accent-grant"> เป็นต้น
+   ทำให้ focus ring / quick-pick / ข้อความสำเร็จ ใช้สีของหน้านั้นเองอัตโนมัติ */
+.accent-grant {
+  --accent: var(--mint-grant);
+  --accent-lit: var(--mint-grant-lit);
+  --accent-ink: var(--mint-ink);
+}
+.accent-deduct {
+  --accent: var(--danger-deduct);
+  --accent-lit: var(--danger-deduct-lit);
+  --accent-ink: var(--danger-ink);
+}
+.accent-quota {
+  --accent: var(--amber-quota);
+  --accent-lit: var(--amber-quota-lit);
+  --accent-ink: var(--amber-ink);
+}
+.accent-admin {
+  --accent: var(--pink-admin);
+  --accent-lit: var(--pink-admin-lit);
+  --accent-ink: var(--pink-ink);
+}
+
+/* ---------------------------------------------------------------
+   1b. Light theme ("day mode") — ค่าธีมสว่างจาก Hybrid Buddy Board design.md
+   --------------------------------------------------------------- */
+/* กฎการเขียน override สองชุดแยกกันเสมอ ห้ามรวม selector กับ @media ไว้บรรทัดเดียว
+   (บั๊กที่เจอมาแล้วในเว็บคู่มือหลักของโปรเจกต์นี้ — ดู root DESIGN.md) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --void-plum: #eef3ff;
+    --card-plum: #ffffff;
+    --raised-plum: #f1f3fa;
+    --text-primary: #1b1a3a;
+    --text-secondary: #565479;
+    --tint: #000000;
+
+    --mint-grant: #0fa97d;
+    --danger-deduct: #d6263b;
+    --danger-ink: #ffffff; /* ธีมสว่าง danger เข้มกว่าธีมมืดมาก ต้องใช้ตัวอักษรขาว */
+
+    /* amber ธีมสว่างใช้ค่า "warn ink" ของต้นฉบับตรง ๆ (เข้มกว่าธีมมืดมาก จึงสลับ ink เป็นขาว) */
+    --amber-quota: #8a5a00;
+    --amber-ink: #ffffff;
+
+    /* pink ธีมสว่างใช้ค่าที่ต้นฉบับแก้ไขเองไว้แล้วสำหรับปัญหาคอนทราสต์ (#ff3d7f เดิมผ่านไม่พอ) */
+    --pink-admin: #d6245f;
+    --pink-ink: #ffffff;
+  }
+}
+:root[data-theme="light"] {
+  --void-plum: #eef3ff;
+  --card-plum: #ffffff;
+  --raised-plum: #f1f3fa;
+  --text-primary: #1b1a3a;
+  --text-secondary: #565479;
+  --tint: #000000;
+
+  --mint-grant: #0fa97d;
+  --danger-deduct: #d6263b;
+  --danger-ink: #ffffff;
+
+  --amber-quota: #8a5a00;
+  --amber-ink: #ffffff;
+
+  --pink-admin: #d6245f;
+  --pink-ink: #ffffff;
+}
+
+/* ---------------------------------------------------------------
+   2. Base
+   --------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--void-plum);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+a {
+  color: var(--accent-lit);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------
+   3. Typography
+   --------------------------------------------------------------- */
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* eyebrow / section label ตัวเล็ก ตัวพิมพ์ใหญ่ ระยะห่างตัวอักษรกว้าง */
+.label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 var(--s-xs);
+}
+
+.body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+/* ตัวเลขยอด token ขนาดใหญ่ (ยอดสะสมบน participant.html) — ตัวเลข = Space Mono เสมอ */
+.display-numeral {
+  font-family: var(--font-mono);
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--mint-grant); /* ยอดสะสม = mint เสมอ ตาม DESIGN.md */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  display: inline-block;
+}
+
+/* ตัวเลขในตาราง/แถว — เรียงหลักตรงกัน, Space Mono เสมอ */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Balance Tick — เรียกโดยเติม/ถอดคลาสนี้เมื่อค่ายอดเปลี่ยน
+   (เฉพาะ participant.html เท่านั้น ตาม DESIGN.md: motion อยู่หน้านี้หน้าเดียว) */
+.tick-bump {
+  animation: tick-bump 0.42s var(--ease-pop);
+}
+@keyframes tick-bump {
+  0% {
+    transform: translateY(0.18em) scale(0.94);
+    opacity: 0.35;
+  }
+  62% {
+    transform: translateY(-0.05em) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tick-bump {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------
+   4. Layout containers
+   --------------------------------------------------------------- */
+.layout-form {
+  width: 100%;
+  max-width: var(--w-form);
+  margin: 0 auto;
+  padding: var(--s-xl) var(--s-md) var(--s-xxl);
+}
+
+.layout-data {
+  width: 100%;
+  max-width: var(--w-data);
+  margin: 0 auto;
+  padding: var(--s-xl) var(--s-md) var(--s-xxl);
+}
+
+/* ระยะห่างแนวตั้งมาตรฐานระหว่างบล็อก */
+.stack > * + * {
+  margin-top: var(--s-lg);
+}
+.stack-sm > * + * {
+  margin-top: var(--s-sm);
+}
+
+/* แยกปุ่มหลักออกจากทุกอย่างรอบตัว (DESIGN.md: primary action อยู่โดดเดี่ยว) */
+.action-isolated {
+  margin-top: var(--s-xxl);
+}
+
+/* ---------------------------------------------------------------
+   5. App bar + nav chips
+   --------------------------------------------------------------- */
+.appbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  flex-wrap: wrap;
+  padding: var(--s-sm) var(--s-md);
+  background: var(--raised-plum);
+  border-bottom: 1px solid var(--hairline);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.appbar .brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin-right: auto;
+  letter-spacing: 0.2px;
+}
+
+.nav-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--s-xs);
+  flex-wrap: wrap;
+}
+
+.nav-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.12s var(--ease-pop);
+}
+
+.nav-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--pink-admin);
+  text-decoration: none;
+}
+
+/* กดแล้วยุบลงเล็กน้อยทันที ให้รู้สึกได้ชัดว่า "กดโดนแล้ว" ก่อนหน้าใหม่จะโหลด
+   (แต่ละปุ่มที่นี่พาไปคนละไฟล์ HTML จริง ไม่ใช่แท็บสลับในหน้าเดียวแบบ reference
+   จึงมีจังหวะโหลดหน้าใหม่สั้นๆ เสมอ ต้องให้ feedback ทันทีที่กด ไม่ใช่รอเงียบๆ) */
+.nav-chip:active {
+  transform: scale(0.96);
+}
+
+/* active = pink เสมอ ไม่ว่าหน้านั้นจะเป็นสีอะไร (navigation = โครงสร้าง ไม่ใช่ action) */
+.nav-chip.active {
+  background: var(--pink-admin);
+  border-color: var(--pink-admin);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------
+   6. Buttons
+   --------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-xs);
+  padding: 12px 22px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hairline);
+  background: var(--raised-plum);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s var(--ease-pop);
+}
+
+.btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--raised-plum) 88%, var(--tint) 12%);
+  text-decoration: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ปุ่มหลักทั้งสามแบบ — padding ใหญ่กว่าปุ่มรอง ตาม DESIGN.md (14px 28px) */
+.btn-grant,
+.btn-deduct,
+.btn-admin {
+  padding: 14px 28px;
+  border-color: transparent;
+}
+
+.btn-grant {
+  background: var(--mint-grant);
+  color: var(--mint-ink);
+}
+.btn-grant:hover:not(:disabled) {
+  background: var(--mint-grant-lit);
+}
+
+.btn-deduct {
+  background: var(--danger-deduct);
+  color: var(--danger-ink);
+}
+.btn-deduct:hover:not(:disabled) {
+  background: var(--danger-deduct-lit);
+}
+
+.btn-admin {
+  background: var(--pink-admin);
+  color: #ffffff;
+}
+.btn-admin:hover:not(:disabled) {
+  background: var(--pink-admin-lit);
+}
+
+/* ปุ่มเต็มความกว้าง (ใช้บนมือถือ/ฟอร์ม) */
+.btn-block {
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------
+   7. Cards
+   --------------------------------------------------------------- */
+.card {
+  background: var(--card-plum);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: var(--s-lg);
+  /* ไม่มี box-shadow — DESIGN.md: แยกพื้นผิวด้วยเส้น hairline เท่านั้น */
+}
+
+.card-tight {
+  padding: var(--s-md);
+}
+
+/* แถวข้อมูลในประวัติ — การ์ดที่กดได้ */
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  flex-wrap: wrap;
+}
+
+/* การ์ดแบบมีแถบสีสดด้านบน — ใช้เฉพาะจุดที่การ์ดสื่อถึงกลุ่ม/บทบาทที่มีสีประจำตัว
+   อยู่แล้วในระบบ (เช่น AdminOverview: การ์ดผู้เข้าร่วม/วิทยากร/แอดมิน) ไม่ใช่การ
+   ตกแต่งลอยๆ — ยังต้องใช้แค่สีที่มีความหมายตรงกับเนื้อหาการ์ดนั้นจริงเท่านั้น
+   (ผู้เข้าร่วม→mint เพราะยอดสะสม=mint, วิทยากร→amber เพราะโควตา=amber,
+   แอดมิน→pink เพราะระบบ/แอดมิน=pink) ไม่ผิดกฎ One Color, One Meaning */
+.card-vivid {
+  overflow: hidden;
+  padding: 0;
+}
+
+.card-band {
+  padding: var(--s-md) var(--s-lg);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+.card-band .label,
+.card-band .num {
+  margin: 0;
+  color: inherit;
+  opacity: 0.82;
+}
+
+.card-band-mint {
+  background: var(--mint-grant);
+  color: var(--mint-ink);
+}
+.card-band-quota {
+  background: var(--amber-quota);
+  color: var(--amber-ink);
+}
+.card-band-admin {
+  background: var(--pink-admin);
+  color: #ffffff;
+}
+
+.card-vivid-body {
+  padding: var(--s-lg);
+}
+
+/* ---------------------------------------------------------------
+   8. Pills (ป้ายประเภทรายการ / สถานะ)
+   --------------------------------------------------------------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--tint) 6%, transparent);
+  color: var(--text-secondary);
+}
+
+.pill-grant {
+  background: color-mix(in srgb, var(--mint-grant) 18%, transparent);
+  color: var(--mint-grant);
+}
+
+.pill-deduct {
+  background: color-mix(in srgb, var(--danger-deduct) 18%, transparent);
+  color: var(--danger-deduct);
+}
+
+/* ปรับโควตา = pink (เป็นการเปลี่ยนสถานะระบบ ไม่ใช่การขยับยอดผู้เข้าร่วม) */
+.pill-admin {
+  background: color-mix(in srgb, var(--pink-admin) 18%, transparent);
+  color: var(--pink-admin-lit);
+}
+
+/* โควตา (ถ้าต้องติดป้ายเรื่องโควตาโดยเฉพาะ) */
+.pill-quota {
+  background: color-mix(in srgb, var(--amber-quota) 18%, transparent);
+  color: var(--amber-quota);
+}
+
+.pill-voided {
+  background: color-mix(in srgb, var(--text-secondary) 12%, transparent);
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+
+/* ---------------------------------------------------------------
+   9. Quota bar — คอมโพเนนต์ลายเซ็น
+   --------------------------------------------------------------- */
+/*  โครงสร้าง HTML ที่ตั้งใจไว้:
+      <div class="quota-bar">
+        <div class="quota-bar-head">
+          <span class="label">โควตาคงเหลือ</span>
+          <span class="quota-bar-value num">32 / 50</span>
+        </div>
+        <div class="quota-bar-track">
+          <div class="quota-bar-fill" style="width:64%"></div>
+        </div>
+      </div>
+    เมื่อเหลือต่ำกว่า 20% ให้แสดงกล่องเตือนเส้นประต่อท้าย:
+      <div class="quota-warning">โควตาใกล้หมด — เหลือ 7 token</div>
+*/
+.quota-bar {
+  display: block;
+}
+
+.quota-bar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-sm);
+  margin-bottom: var(--s-xs);
+}
+
+.quota-bar-value {
+  font-weight: 600;
+  color: var(--amber-quota); /* โควตา = amber เสมอ ห้ามเปลี่ยนเป็น danger ตอนใกล้หมด */
+}
+
+.quota-bar-track {
+  height: 8px;
+  width: 100%;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--tint) 7%, transparent);
+  overflow: hidden;
+}
+
+.quota-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: var(--r-pill);
+  background: var(--amber-quota);
+  transition: width 0.3s var(--ease-pop);
+}
+
+/* กล่องเตือนเส้นประ — รูปทรงเดียวกับกล่อง "เลือกเองได้" ของงานอ้างอิง
+   ใช้ amber เท่านั้น: โควตาใกล้หมดคือ "คำเตือน" ไม่ใช่ "การหักยอด" */
+.quota-warning {
+  margin-top: var(--s-sm);
+  padding: var(--s-sm) var(--s-md);
+  border: 1.5px dashed var(--amber-quota);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--amber-quota) 8%, transparent);
+  color: var(--amber-quota-lit);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------
+   10. Forms
+   --------------------------------------------------------------- */
+.field {
+  display: block;
+  margin-bottom: var(--s-md);
+}
+
+.input,
+select.input,
+textarea.input {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--hairline);
+  background: var(--card-plum);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* โฟกัส = ขอบสว่างขึ้นเป็นสีประจำหน้านั้น + ring 2px */
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+textarea.input {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* ข้อความช่วยเหลือใต้ช่องกรอก */
+.hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ---- แถวปุ่มลัดเลือกจำนวน/เหตุผล (quick-pick) ---- */
+.pick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-xs);
+}
+
+.pick {
+  padding: 9px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.07); /* fallback ถ้าเบราว์เซอร์ไม่รองรับ color-mix */
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pick:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* ถูกเลือกแล้ว = เติมสีเต็ม */
+.pick.selected,
+.pick[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.pick:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------
+   11. ข้อความแจ้งผล (inline — ไม่มี motion บนหน้า Operate)
+   --------------------------------------------------------------- */
+.msg {
+  display: block;
+  padding: var(--s-sm) var(--s-md);
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.msg:empty {
+  display: none;
+}
+
+/* สำเร็จ = สีประจำหน้านั้นเอง (ไม่ยืมสีของหน้าอื่นมาใช้) */
+.msg-ok {
+  background: rgba(255, 255, 255, 0.06); /* fallback */
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent-lit);
+}
+
+/* ผิดพลาด = danger ตามจานสีใหม่ (ตรงกับความหมาย "ผิดพลาด/ลบ" ของสีนี้อยู่แล้ว) */
+.msg-error {
+  background: color-mix(in srgb, var(--danger-deduct) 14%, transparent);
+  color: var(--danger-deduct-lit);
+}
+
+/* คำเตือน/ข้อควรระวัง = amber */
+.msg-warn {
+  background: color-mix(in srgb, var(--amber-quota) 10%, transparent);
+  color: var(--amber-quota-lit);
+}
+
+/* ---------------------------------------------------------------
+   12. Tables
+   --------------------------------------------------------------- */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead th {
+  background: var(--card-plum);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--s-sm) var(--s-md);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: var(--s-sm) var(--s-md);
+  border-top: 1px solid var(--hairline);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: var(--raised-plum);
+}
+
+/* คอลัมน์ตัวเลข ชิดขวา + เรียงหลักตรงกัน */
+.table .col-num,
+.table td.col-num,
+.table th.col-num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* แถวของรายการที่ถูกยกเลิกแล้ว — จางลงทั้งแถว */
+.table tbody tr.is-voided td,
+.is-voided {
+  opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------
+   13. สถานะว่าง / กำลังโหลด
+   --------------------------------------------------------------- */
+.empty {
+  padding: var(--s-xl);
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--hairline);
+  border-radius: var(--r-lg);
+}
+
+.loading {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ---------------------------------------------------------------
+   14. Utilities
+   --------------------------------------------------------------- */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  flex-wrap: wrap;
+}
+.row-between {
+  justify-content: space-between;
+}
+.grow {
+  flex: 1;
+}
+.text-right {
+  text-align: right;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.hidden {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------
+   15. Day/Night toggle — ปุ่มเดียวกันทุกหน้า (ดู shared/theme.js)
+   --------------------------------------------------------------- */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hairline);
+  background: var(--raised-plum);
+  color: var(--text-primary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s var(--ease-pop);
+}
+.theme-toggle-btn:hover {
+  background: color-mix(in srgb, var(--raised-plum) 88%, var(--tint) 12%);
+}
+.theme-toggle-btn:active {
+  transform: scale(0.9);
+}
+
+@media (max-width: 560px) {
+  .layout-form,
+  .layout-data {
+    padding-top: var(--s-lg);
+  }
+  .btn-grant,
+  .btn-deduct,
+  .btn-admin {
+    width: 100%;
+  }
+}

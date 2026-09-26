@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ยอด Token ของฉัน — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+<style>
+  /* ---------------------------------------------------------------
+     ตกแต่งเฉพาะหน้านี้เท่านั้น (Confetti Quarantine ตาม DESIGN.md)
+     ใช้แค่ mint กับ sun-decor เท่านั้น (สีที่ไม่ได้ผูกความหมายกับ action อื่น)
+     ไม่มีการเพิ่มสี hex ใหม่ — ห้ามคัดลอกกฎนี้ไปหน้าอื่น
+     --------------------------------------------------------------- */
+  .quiet-signout {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--r-sm);
+  }
+  .quiet-signout:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+
+  .top-row {
+    max-width: var(--w-form);
+    margin: 0 auto;
+    padding: var(--s-md) var(--s-md) 0;
+  }
+
+  #offline-banner {
+    max-width: var(--w-form);
+    margin: var(--s-md) auto 0;
+  }
+
+  /* Hero: full-bleed ตาม DESIGN.md ("ParticipantDashboard is full-bleed like the reference's hero") */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: var(--s-xxl) var(--s-md) var(--s-xl);
+  }
+
+  .hero-shapes {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .shape {
+    position: absolute;
+    opacity: 0.4;
+    animation: float-shape 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes float-shape {
+    from { transform: translateY(0) rotate(var(--shape-rot, 0deg)); }
+    to   { transform: translateY(-18px) rotate(calc(var(--shape-rot, 0deg) + 10deg)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shape { animation: none; }
+  }
+
+  @media (max-width: 560px) {
+    .shape-d, .shape-e { display: none; }
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: var(--w-form);
+    margin: 0 auto;
+  }
+
+  .gradient-text {
+    color: var(--mint-grant); /* fallback ถ้าเบราว์เซอร์ไม่รองรับ background-clip:text */
+    background: linear-gradient(90deg, var(--mint-grant), var(--sun-decor));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-greeting {
+    margin: var(--s-sm) 0 var(--s-xs);
+  }
+
+  .hero-sub {
+    margin: 0;
+  }
+
+  .hero-balance {
+    margin-top: var(--s-xl);
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-sm);
+    flex-wrap: wrap;
+  }
+
+  .hero-balance-label {
+    margin: 0;
+  }
+
+  .history-section {
+    margin-top: var(--s-lg);
+  }
+</style>
+</head>
+<body class="accent-grant">
+
+<div class="top-row row row-between">
+  <span class="label" style="margin:0">Training for the Trainers</span>
+  <div class="row" style="gap:var(--s-xs)">
+    <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+    <button type="button" id="sign-out" class="quiet-signout">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div id="offline-banner" class="msg msg-warn hidden" role="status" aria-live="polite"></div>
+
+<section class="hero">
+  <div class="hero-shapes" aria-hidden="true">
+    <span class="shape shape-a" style="top:8%; left:6%; width:52px; height:52px; border-radius:50%;
+      background:var(--mint-grant); box-shadow:0 0 32px color-mix(in srgb, var(--mint-grant) 55%, transparent);
+      animation-delay:0s;"></span>
+    <span class="shape shape-b" style="top:16%; right:9%; width:34px; height:34px;
+      background:var(--sun-decor); box-shadow:0 0 28px color-mix(in srgb, var(--sun-decor) 55%, transparent);
+      --shape-rot:45deg; transform:rotate(45deg); animation-delay:1.2s;"></span>
+    <span class="shape shape-c" style="bottom:10%; left:12%; width:0; height:0;
+      border-left:22px solid transparent; border-right:22px solid transparent;
+      border-bottom:38px solid var(--mint-grant); filter:drop-shadow(0 0 18px color-mix(in srgb, var(--mint-grant) 45%, transparent));
+      animation-delay:2s;"></span>
+    <span class="shape shape-d" style="top:42%; right:20%; width:18px; height:18px; border-radius:50%;
+      background:var(--sun-decor); box-shadow:0 0 24px color-mix(in srgb, var(--sun-decor) 55%, transparent);
+      animation-delay:0.6s;"></span>
+    <span class="shape shape-e" style="bottom:18%; right:6%; width:28px; height:28px;
+      background:var(--mint-grant); box-shadow:0 0 26px color-mix(in srgb, var(--mint-grant) 55%, transparent);
+      --shape-rot:45deg; transform:rotate(45deg); animation-delay:1.8s;"></span>
+  </div>
+
+  <div class="hero-inner">
+    <span class="label">TFT e-Token</span>
+    <h1 class="headline hero-greeting"><span class="gradient-text">สวัสดี</span>, <span id="greeting-name"></span></h1>
+    <p class="muted hero-sub">ยอด token สะสมของคุณตอนนี้</p>
+
+    <div class="hero-balance">
+      <span id="balance" class="display-numeral">0</span>
+      <span class="label hero-balance-label">token คงเหลือ</span>
+    </div>
+  </div>
+</section>
+
+<main class="layout-data">
+  <section class="history-section stack">
+    <span class="label">ประวัติการทำรายการ</span>
+    <div id="history"><p class="loading">กำลังโหลดประวัติ...</p></div>
+  </section>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { listTransactionsByTarget, formatTimestamp } from './shared/data.js';
+import { db, toShortCode } from './shared/firebase-init.js';
+import { doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์ และรอ Firebase resolve auth ให้เรียบร้อยก่อน
+const { authUser, profile } = await requireRole(['participant']);
+
+const greetingNameEl = document.getElementById('greeting-name');
+const balanceEl = document.getElementById('balance');
+const historyEl = document.getElementById('history');
+const signOutBtn = document.getElementById('sign-out');
+const offlineBanner = document.getElementById('offline-banner');
+
+greetingNameEl.textContent = profile.fullName || toShortCode(profile.username);
+
+/* -------------------------------------------------------------- *
+ * Balance Tick — README ข้อ 7 / DESIGN.md "Signature Component"
+ * live listener บน users/{uid} ของตัวเอง + เติม/ถอด .tick-bump เมื่อยอดเปลี่ยน
+ * -------------------------------------------------------------- */
+let lastBalance = Number(profile.tokenBalance ?? 0);
+let tickTimer = null;
+balanceEl.textContent = lastBalance.toLocaleString('th-TH');
+
+function renderBalance(newBalance) {
+  const n = Number(newBalance ?? 0);
+  const changed = n !== lastBalance;
+  lastBalance = n;
+  balanceEl.textContent = n.toLocaleString('th-TH');
+
+  if (changed) {
+    balanceEl.classList.remove('tick-bump');
+    void balanceEl.offsetWidth; // force reflow ให้ animation เล่นซ้ำได้ทุกครั้ง
+    balanceEl.classList.add('tick-bump');
+    clearTimeout(tickTimer);
+    tickTimer = setTimeout(() => balanceEl.classList.remove('tick-bump'), 420); // ตรงกับ 0.42s ใน styles.css
+  }
+}
+
+onSnapshot(
+  doc(db, 'users', authUser.uid),
+  (snap) => {
+    if (!snap.exists()) return;
+    renderBalance(snap.data().tokenBalance);
+  },
+  (err) => {
+    console.error('[participant] ฟัง balance แบบเรียลไทม์ไม่สำเร็จ', err);
+  }
+);
+
+/* -------------------------------------------------------------- *
+ * ประวัติการทำรายการที่กระทบยอดของตัวเอง
+ * -------------------------------------------------------------- */
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function renderHistoryTable(txs) {
+  const rows = txs.map((t) => {
+    const voided = t.status === 'voided';
+    const isGrant = t.type === 'grant';
+    const pillClass = isGrant ? 'pill-grant' : 'pill-deduct';
+    const pillLabel = isGrant ? 'แจก' : 'หัก';
+    const sign = isGrant ? '+' : '-';
+    const amountText = `${sign}${Number(t.amount ?? 0).toLocaleString('th-TH')}`;
+    const detail = isGrant ? (t.reason || '-') : (t.itemLabel || '-');
+    return `
+      <tr class="${voided ? 'is-voided' : ''}">
+        <td>${escapeHtml(formatTimestamp(t.createdAt))}</td>
+        <td>
+          <span class="pill ${pillClass}">${pillLabel}</span>
+          ${voided ? '<span class="pill pill-voided">ยกเลิกแล้ว</span>' : ''}
+        </td>
+        <td class="col-num num">${amountText}</td>
+        <td>${escapeHtml(detail)}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>วันเวลา</th>
+            <th>ประเภท</th>
+            <th class="col-num">จำนวน</th>
+            <th>รายละเอียด</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+async function loadHistory() {
+  historyEl.innerHTML = '<p class="loading">กำลังโหลดประวัติ...</p>';
+  try {
+    const txs = await listTransactionsByTarget(authUser.uid);
+    if (txs.length === 0) {
+      historyEl.innerHTML = '<div class="empty">ยังไม่มีประวัติการแจก/หัก token ของคุณ</div>';
+      return;
+    }
+    historyEl.innerHTML = renderHistoryTable(txs);
+  } catch (err) {
+    console.error('[participant] โหลดประวัติไม่สำเร็จ', err);
+    if (err?.code === 'failed-precondition') {
+      // ยังไม่ได้สร้าง composite index — README ข้อ 5 บอกให้แสดงข้อความนี้แทนจอขาว
+      historyEl.innerHTML = '<div class="empty">กำลังเตรียมระบบ กรุณาลองใหม่อีกครั้งในอีกสักครู่</div>';
+    } else {
+      historyEl.innerHTML = `<div class="msg msg-error">${escapeHtml(err.message || 'โหลดประวัติไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')}</div>`;
+    }
+  }
+}
+
+/* -------------------------------------------------------------- *
+ * สถานะออฟไลน์ — ห้องบรรยายเน็ตไม่แน่นอน (SCOPE.md)
+ * -------------------------------------------------------------- */
+function updateOnlineStatus() {
+  if (navigator.onLine) {
+    offlineBanner.classList.add('hidden');
+    offlineBanner.textContent = '';
+  } else {
+    offlineBanner.textContent = 'ขาดการเชื่อมต่ออินเทอร์เน็ต — ยอดและประวัติที่แสดงอาจไม่เป็นปัจจุบัน กรุณาตรวจสอบสัญญาณ';
+    offlineBanner.classList.remove('hidden');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+signOutBtn.addEventListener('click', async () => {
+  signOutBtn.disabled = true;
+  try {
+    await signOutUser();
+  } finally {
+    location.replace('login.html');
+  }
+});
+
+loadHistory();
+</script>
+
+</body>
+</html>

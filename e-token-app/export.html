@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Export ข้อมูล — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-admin">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token TFT</span>
+  <nav class="nav-chips">
+    <a class="nav-chip" href="admin-overview.html">ภาพรวม</a>
+    <a class="nav-chip" href="deduct.html">หัก Token</a>
+    <a class="nav-chip" href="transactions.html">รายการ</a>
+    <a class="nav-chip" href="trainer-quota.html">โควตาวิทยากร</a>
+    <a class="nav-chip" href="user-management.html">จัดการบัญชี</a>
+    <a class="nav-chip active" href="export.html">Export</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="signout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-form">
+  <header style="margin-bottom:var(--s-xl)">
+    <span class="label">แอดมิน</span>
+    <h1 class="headline">Export ข้อมูล</h1>
+    <p class="muted" style="margin:var(--s-xs) 0 0">
+      ดาวน์โหลดข้อมูลผู้ใช้และประวัติการทำรายการทั้งหมดในระบบเป็นไฟล์ CSV สองไฟล์ สำหรับสำรองข้อมูลหรือเปิดดูใน Excel
+    </p>
+  </header>
+
+  <section class="card">
+    <p class="body">
+      เมื่อกดปุ่มด้านล่าง ระบบจะดึงข้อมูลล่าสุดทั้งหมดและดาวน์โหลดให้ทันที 2 ไฟล์:
+    </p>
+    <ul class="body">
+      <li><code>e-token-users-&lt;วันที่&gt;.csv</code> — รายชื่อผู้ใช้ทุกคน พร้อมยอด/โควตาปัจจุบัน</li>
+      <li><code>e-token-transactions-&lt;วันที่&gt;.csv</code> — ประวัติรายการแจก/หัก/ปรับโควตาทั้งหมด</li>
+    </ul>
+
+    <div id="msg" class="msg" role="alert" aria-live="polite"></div>
+
+    <div class="action-isolated">
+      <button class="btn btn-admin btn-block" id="export-btn" type="button">ดาวน์โหลดข้อมูลทั้งหมด (CSV)</button>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { exportAllDataAsCSV, downloadCsv } from './shared/data.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์
+await requireRole(['admin']);
+
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+const msgEl = document.getElementById('msg');
+const exportBtn = document.getElementById('export-btn');
+
+function showMsg(text, kind) {
+  msgEl.textContent = text;
+  msgEl.classList.remove('msg-ok', 'msg-error');
+  if (kind) msgEl.classList.add(kind);
+}
+
+function dateStamp(d) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+exportBtn.addEventListener('click', async () => {
+  showMsg('', null);
+  exportBtn.disabled = true;
+  exportBtn.textContent = 'กำลังเตรียมไฟล์...';
+
+  try {
+    const { usersCsv, transactionsCsv, generatedAt } = await exportAllDataAsCSV();
+    const stamp = dateStamp(generatedAt instanceof Date ? generatedAt : new Date());
+    downloadCsv(`e-token-users-${stamp}.csv`, usersCsv);
+    downloadCsv(`e-token-transactions-${stamp}.csv`, transactionsCsv);
+    showMsg('ดาวน์โหลดไฟล์ทั้งสองเรียบร้อยแล้ว ตรวจสอบในโฟลเดอร์ดาวน์โหลดของเบราว์เซอร์', 'msg-ok');
+  } catch (err) {
+    showMsg(err?.message || 'ดึงข้อมูลไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่', 'msg-error');
+  } finally {
+    exportBtn.disabled = false;
+    exportBtn.textContent = 'ดาวน์โหลดข้อมูลทั้งหมด (CSV)';
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตั้งค่าโควตาวิทยากร — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+<style>
+  /* ช่องแก้โควตา/แถบโควตา = amber เสมอ (README ตารางข้อ 2) แม้หน้านี้ใช้ accent-admin (pink) โดยรวม
+     อ้างอิงเฉพาะ custom property ที่มีอยู่แล้วใน styles.css (--amber-quota ฯลฯ) ไม่มีสีใหม่ / ไม่มี hex ใหม่ */
+  .quota-amber-scope {
+    --accent: var(--amber-quota);
+    --accent-lit: var(--amber-quota-lit);
+    --accent-ink: var(--amber-ink);
+  }
+</style>
+</head>
+<body class="accent-admin">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token TFT</span>
+  <nav class="nav-chips">
+    <a class="nav-chip" href="admin-overview.html">ภาพรวม</a>
+    <a class="nav-chip" href="deduct.html">หัก Token</a>
+    <a class="nav-chip" href="transactions.html">รายการ</a>
+    <a class="nav-chip active" href="trainer-quota.html">โควตาวิทยากร</a>
+    <a class="nav-chip" href="user-management.html">จัดการบัญชี</a>
+    <a class="nav-chip" href="export.html">Export</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="logout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-data">
+  <div class="stack">
+    <header>
+      <span class="label">Admin</span>
+      <h1 class="headline">ตั้งค่าโควตาวิทยากร</h1>
+      <p class="muted" style="margin:var(--s-xs) 0 0">ปรับโควตา token ของวิทยากรแต่ละคน — บันทึกเป็น "ค่าโควตาใหม่" ทั้งหมด ไม่ใช่การบวก/ลบส่วนต่าง</p>
+    </header>
+
+    <div id="offline-banner" class="msg msg-warn hidden" role="status">
+      ขาดการเชื่อมต่ออินเทอร์เน็ต — ข้อมูลที่แสดงอาจไม่เป็นปัจจุบัน กรุณาตรวจสอบสัญญาณแล้วรีเฟรชหน้านี้
+    </div>
+
+    <div id="status" class="loading"></div>
+
+    <div id="trainer-list" class="stack"></div>
+  </div>
+</main>
+
+<!-- แม่แบบแถวของวิทยากรหนึ่งคน (ใช้ cloneNode จาก template นี้) -->
+<template id="trainer-row-template">
+  <section class="card">
+    <div class="row-between" style="margin-bottom:var(--s-md)">
+      <div>
+        <strong class="js-fullname"></strong>
+        <div class="muted js-username"></div>
+      </div>
+    </div>
+
+    <div class="quota-amber-scope">
+      <div class="quota-bar">
+        <div class="quota-bar-head">
+          <span class="label" style="margin:0">โควตาปัจจุบัน</span>
+          <span class="quota-bar-value num js-quota-value"></span>
+        </div>
+        <div class="quota-bar-track"><div class="quota-bar-fill js-quota-fill" style="width:0%"></div></div>
+      </div>
+      <div class="quota-warning js-quota-warning hidden"></div>
+    </div>
+
+    <div class="row" style="margin-top:var(--s-md); align-items:flex-end">
+      <div class="field grow" style="margin-bottom:0; max-width:200px">
+        <label class="label js-input-label" for=""></label>
+        <input class="input quota-amber-scope js-quota-input" type="number" min="0" step="1" inputmode="numeric">
+      </div>
+      <button class="btn btn-admin js-save-btn" type="button">บันทึก</button>
+    </div>
+
+    <div class="msg js-row-msg" role="status" style="margin-top:var(--s-sm)"></div>
+  </section>
+</template>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { listAllUsers, adjustQuota } from './shared/data.js';
+import { toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์ และรอ Firebase resolve auth ให้เรียบร้อยก่อน
+const { authUser, profile } = await requireRole(['admin']);
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+/* สถานะออฟไลน์ — ห้องบรรยายเน็ตไม่แน่นอน (SCOPE.md) */
+const offlineBanner = document.getElementById('offline-banner');
+function updateOnlineStatus() {
+  offlineBanner.classList.toggle('hidden', navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+const statusEl = document.getElementById('status');
+const listEl = document.getElementById('trainer-list');
+const template = document.getElementById('trainer-row-template');
+
+/* ไม่มีค่า "โควตาตั้งต้นสูงสุด" เก็บไว้ในระบบ (tokenQuota คือค่าปัจจุบันเพียงค่าเดียว)
+   ใช้ 100 เป็นสเกลอ้างอิงคร่าว ๆ สำหรับวาดแถบเท่านั้น (SCOPE.md: ค่าเริ่มต้น 50 ต่อคน) */
+const BAR_SCALE_REFERENCE = 100;
+
+function renderQuotaVisual(row, quota) {
+  const pct = Math.max(0, Math.min(100, (quota / BAR_SCALE_REFERENCE) * 100));
+  row.querySelector('.js-quota-value').textContent = `${quota} token`;
+  row.querySelector('.js-quota-fill').style.width = `${pct}%`;
+
+  const warningEl = row.querySelector('.js-quota-warning');
+  if (pct < 20) {
+    warningEl.textContent = `โควตาใกล้หมด — เหลือ ${quota} token`;
+    warningEl.classList.remove('hidden');
+  } else {
+    warningEl.classList.add('hidden');
+  }
+}
+
+function renderTrainerRow(trainer) {
+  const node = template.content.firstElementChild.cloneNode(true);
+  node.querySelector('.js-fullname').textContent = trainer.fullName || '—';
+  node.querySelector('.js-username').textContent = trainer.username ? toShortCode(trainer.username) : '—';
+
+  const quota = Number(trainer.tokenQuota ?? 0);
+  renderQuotaVisual(node, quota);
+
+  const input = node.querySelector('.js-quota-input');
+  input.id = `quota-input-${trainer.uid}`;
+  input.value = String(quota);
+  const inputLabel = node.querySelector('.js-input-label');
+  inputLabel.setAttribute('for', input.id);
+  inputLabel.textContent = 'ตั้งโควตาใหม่เป็น';
+
+  const saveBtn = node.querySelector('.js-save-btn');
+  const rowMsg = node.querySelector('.js-row-msg');
+
+  saveBtn.addEventListener('click', async () => {
+    rowMsg.className = 'msg js-row-msg';
+    rowMsg.textContent = '';
+
+    const newQuota = Number(input.value);
+    if (!Number.isFinite(newQuota) || !Number.isInteger(newQuota) || newQuota < 0) {
+      rowMsg.className = 'msg msg-error js-row-msg';
+      rowMsg.textContent = 'โควตาใหม่ต้องเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป';
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'กำลังบันทึก...';
+
+    try {
+      await adjustQuota({ actorUid: authUser.uid, trainerUid: trainer.uid, newQuota });
+      // ต้องแสดงว่า "ตั้งโควตาเป็น N" เสมอ — ห้ามแสดงเป็น +N/-N (README ข้อ 5)
+      rowMsg.className = 'msg msg-ok js-row-msg';
+      rowMsg.textContent = `ตั้งโควตาเป็น ${newQuota} token แล้ว`;
+      trainer.tokenQuota = newQuota;
+      renderQuotaVisual(node, newQuota);
+    } catch (e) {
+      rowMsg.className = 'msg msg-error js-row-msg';
+      rowMsg.textContent = e.message || 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'บันทึก';
+    }
+  });
+
+  return node;
+}
+
+async function load() {
+  statusEl.textContent = 'กำลังโหลดข้อมูล...';
+  statusEl.className = 'loading';
+  listEl.textContent = '';
+
+  try {
+    const users = await listAllUsers();
+    const trainers = users.filter((u) => u.role === 'trainer');
+    statusEl.textContent = '';
+    statusEl.className = '';
+
+    if (trainers.length === 0) {
+      statusEl.className = 'empty';
+      statusEl.textContent = 'ยังไม่มีวิทยากรในระบบ — สร้างบัญชีวิทยากรได้ที่หน้า "จัดการบัญชี"';
+      return;
+    }
+
+    for (const trainer of trainers) {
+      listEl.appendChild(renderTrainerRow(trainer));
+    }
+  } catch (e) {
+    statusEl.className = 'msg msg-error';
+    statusEl.textContent = e.message || 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>

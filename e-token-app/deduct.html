@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หัก Token — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-deduct">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token TFT</span>
+  <nav class="nav-chips">
+    <a class="nav-chip" href="admin-overview.html">ภาพรวม</a>
+    <a class="nav-chip active" href="deduct.html">หัก Token</a>
+    <a class="nav-chip" href="transactions.html">รายการ</a>
+    <a class="nav-chip" href="trainer-quota.html">โควตาวิทยากร</a>
+    <a class="nav-chip" href="user-management.html">จัดการบัญชี</a>
+    <a class="nav-chip" href="export.html">Export</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="signout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-form">
+  <header style="margin-bottom:var(--s-xl)">
+    <span class="label">แอดมิน · คืนวันประมูล</span>
+    <h1 class="headline">หัก Token</h1>
+    <p class="muted" style="margin:var(--s-xs) 0 0">
+      กรอกรหัสประจำตัวผู้ชนะประมูล ระบุจำนวนที่หัก และรายการของรางวัลที่แลกไป
+    </p>
+  </header>
+
+  <section class="card">
+    <form id="deduct-form" novalidate>
+      <div class="field">
+        <label class="label" for="username">รหัสประจำตัวผู้ชนะประมูล (2 หลักท้าย)</label>
+        <input class="input" id="username" name="username" type="text"
+               inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2"
+               autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="เช่น 23" required>
+        <span class="hint">พิมพ์แล้วระบบจะค้นหาชื่อและยอดคงเหลือให้อัตโนมัติ</span>
+      </div>
+
+      <!-- ผลค้นหาผู้ใช้ — ต้องเห็นก่อนกดยืนยันเสมอ -->
+      <div class="card-tight" id="resolved" hidden style="margin-bottom:var(--s-md)">
+        <div class="row-between">
+          <div>
+            <div class="label">ผู้ชนะประมูล</div>
+            <div class="body" id="resolved-name">-</div>
+          </div>
+          <div class="text-right">
+            <div class="label">ยอดคงเหลือ</div>
+            <div class="num" id="resolved-balance" style="font-size:20px;font-weight:600">-</div>
+          </div>
+        </div>
+      </div>
+      <div class="muted" id="lookup-status" style="margin-bottom:var(--s-md)"></div>
+
+      <div class="field">
+        <span class="label">จำนวนที่หัก</span>
+        <div class="pick-row" id="amount-picks">
+          <button type="button" class="pick" data-amount="1">1</button>
+          <button type="button" class="pick" data-amount="3">3</button>
+          <button type="button" class="pick" data-amount="5">5</button>
+          <button type="button" class="pick" data-amount="10">10</button>
+          <button type="button" class="pick" data-amount="15">15</button>
+          <button type="button" class="pick selected" id="amount-custom-pick">ระบุเอง</button>
+        </div>
+        <input class="input" id="amount" name="amount" type="number" inputmode="numeric"
+               min="1" step="1" placeholder="จำนวน token" required style="margin-top:var(--s-sm)">
+        <div class="msg msg-warn" id="balance-warn" role="alert"></div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="item-label">รายการของรางวัลที่แลกไป</label>
+        <input class="input" id="item-label" name="item-label" type="text"
+               placeholder="เช่น ตุ๊กตาหมี, บัตรกำนัล 200 บาท" required>
+      </div>
+
+      <div id="error" class="msg msg-error" role="alert" aria-live="polite"></div>
+      <div id="ok" class="msg msg-ok" role="status" aria-live="polite"></div>
+
+      <div class="action-isolated">
+        <button class="btn btn-deduct btn-block" id="submit" type="submit">ยืนยันการหัก Token</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { findUserByUsername, deductToken } from './shared/data.js';
+import { toFullUsername, toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์
+const { authUser } = await requireRole(['admin']);
+
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+const form = document.getElementById('deduct-form');
+const usernameEl = document.getElementById('username');
+const amountEl = document.getElementById('amount');
+const itemLabelEl = document.getElementById('item-label');
+const errorEl = document.getElementById('error');
+const okEl = document.getElementById('ok');
+const submitEl = document.getElementById('submit');
+
+const resolvedEl = document.getElementById('resolved');
+const resolvedNameEl = document.getElementById('resolved-name');
+const resolvedBalanceEl = document.getElementById('resolved-balance');
+const lookupStatusEl = document.getElementById('lookup-status');
+const balanceWarnEl = document.getElementById('balance-warn');
+
+const amountPicksEl = document.getElementById('amount-picks');
+const amountCustomPick = document.getElementById('amount-custom-pick');
+
+let resolvedUser = null; // { uid, username, fullName, tokenBalance }
+let lookupSeq = 0;       // กันผลค้นหาเก่ามาทับผลใหม่ (ถ้าพิมพ์เร็ว)
+let lookupTimer = null;
+
+function clearMessages() {
+  errorEl.textContent = '';
+  okEl.textContent = '';
+}
+
+function resetResolved() {
+  resolvedUser = null;
+  resolvedEl.hidden = true;
+  lookupStatusEl.textContent = '';
+  updateBalanceWarning();
+}
+
+function showResolved(user) {
+  resolvedUser = user;
+  resolvedNameEl.textContent = `${user.fullName || '(ไม่มีชื่อ)'} (${toShortCode(user.username)})`;
+  resolvedBalanceEl.textContent = `${Number(user.tokenBalance ?? 0)} token`;
+  resolvedEl.hidden = false;
+  lookupStatusEl.textContent = '';
+  updateBalanceWarning();
+}
+
+function updateBalanceWarning() {
+  const amt = Number(amountEl.value);
+  if (resolvedUser && Number.isFinite(amt) && amt > 0) {
+    const balance = Number(resolvedUser.tokenBalance ?? 0);
+    if (amt > balance) {
+      balanceWarnEl.textContent = `ยอดคงเหลือไม่พอ — ${toShortCode(resolvedUser.username)} เหลือ ${balance} token แต่กำลังจะหัก ${amt} token`;
+      return;
+    }
+  }
+  balanceWarnEl.textContent = '';
+}
+
+async function runLookup() {
+  const raw = usernameEl.value.trim();
+  resetResolved();
+  if (!raw) return;
+
+  const seq = ++lookupSeq;
+  lookupStatusEl.textContent = 'กำลังค้นหา...';
+  try {
+    const user = await findUserByUsername(toFullUsername(raw));
+    if (seq !== lookupSeq) return; // มีการค้นหาใหม่แซงไปแล้ว
+    if (!user) {
+      lookupStatusEl.textContent = '';
+      errorEl.textContent = `ไม่พบรหัสประจำตัว "${raw}" ในระบบ`;
+      return;
+    }
+    errorEl.textContent = '';
+    showResolved(user);
+  } catch (err) {
+    if (seq !== lookupSeq) return;
+    lookupStatusEl.textContent = '';
+    errorEl.textContent = err?.message || 'ค้นหาไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่';
+  }
+}
+
+usernameEl.addEventListener('input', () => {
+  clearMessages();
+  clearTimeout(lookupTimer);
+  lookupTimer = setTimeout(runLookup, 400);
+});
+usernameEl.addEventListener('blur', () => {
+  clearTimeout(lookupTimer);
+  runLookup();
+});
+
+amountEl.addEventListener('input', () => {
+  amountCustomPick.classList.add('selected');
+  for (const p of amountPicksEl.querySelectorAll('.pick[data-amount]')) p.classList.remove('selected');
+  updateBalanceWarning();
+});
+
+amountPicksEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pick');
+  if (!btn) return;
+
+  if (btn === amountCustomPick) {
+    for (const p of amountPicksEl.querySelectorAll('.pick[data-amount]')) p.classList.remove('selected');
+    amountCustomPick.classList.add('selected');
+    amountEl.value = '';
+    amountEl.readOnly = false;
+    amountEl.focus();
+    updateBalanceWarning();
+    return;
+  }
+
+  const amt = btn.dataset.amount;
+  for (const p of amountPicksEl.querySelectorAll('.pick')) p.classList.remove('selected');
+  btn.classList.add('selected');
+  amountEl.value = amt;
+  amountEl.readOnly = false;
+  updateBalanceWarning();
+});
+
+function resetForm() {
+  form.reset();
+  resetResolved();
+  amountEl.readOnly = false;
+  for (const p of amountPicksEl.querySelectorAll('.pick')) p.classList.remove('selected');
+  amountCustomPick.classList.add('selected');
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearMessages();
+
+  const shortCode = usernameEl.value.trim();
+  const username = toFullUsername(shortCode);
+  const amount = Number(amountEl.value);
+  const itemLabel = itemLabelEl.value.trim();
+
+  if (!shortCode) {
+    errorEl.textContent = 'กรุณากรอกรหัสประจำตัวผู้ชนะประมูล';
+    usernameEl.focus();
+    return;
+  }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    errorEl.textContent = 'กรุณาระบุจำนวน token ที่จะหักให้ถูกต้อง';
+    amountEl.focus();
+    return;
+  }
+  if (!itemLabel) {
+    errorEl.textContent = 'กรุณาระบุรายการของรางวัลที่แลกไป';
+    itemLabelEl.focus();
+    return;
+  }
+
+  submitEl.disabled = true;
+  submitEl.textContent = 'กำลังบันทึก...';
+
+  try {
+    await deductToken({ actorUid: authUser.uid, targetUsername: username, amount, itemLabel });
+    okEl.textContent = `หัก ${amount} token จาก "${shortCode}" เรียบร้อยแล้ว`;
+    resetForm();
+  } catch (err) {
+    if (err?.code === 'data/insufficient-balance' || err?.code === 'data/target-not-found') {
+      errorEl.textContent = err.message;
+    } else {
+      errorEl.textContent = err?.message || 'หัก token ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    }
+  } finally {
+    submitEl.disabled = false;
+    submitEl.textContent = 'ยืนยันการหัก Token';
+  }
+});
+</script>
+
+</body>
+</html>

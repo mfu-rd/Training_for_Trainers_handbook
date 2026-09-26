@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แจก Token — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-grant">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token</span>
+  <nav class="nav-chips">
+    <a class="nav-chip active" href="grant.html">แจก Token</a>
+    <a class="nav-chip" href="trainer-history.html">ประวัติการแจก</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="signout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-form">
+  <header class="stack-sm" style="margin:var(--s-xl) 0">
+    <span class="label">วิทยากร</span>
+    <h1 class="headline">แจก Token</h1>
+  </header>
+
+  <section class="card" id="quota-section">
+    <div class="quota-bar">
+      <div class="quota-bar-head">
+        <span class="label">โควตาคงเหลือ</span>
+        <span class="quota-bar-value num" id="quota-value">กำลังโหลด...</span>
+      </div>
+      <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-fill" style="width:0%"></div></div>
+    </div>
+    <div class="quota-warning hidden" id="quota-warning"></div>
+  </section>
+
+  <section class="card" style="margin-top:var(--s-lg)">
+    <form id="grant-form" novalidate>
+      <div class="field">
+        <label class="label" for="target-username">รหัสประจำตัวผู้รับ (2 หลักท้าย)</label>
+        <input class="input" id="target-username" type="text"
+               inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2"
+               autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="เช่น 23" required>
+        <span class="hint" id="target-hint">พิมพ์รหัสประจำตัวแล้วออกจากช่องเพื่อตรวจสอบชื่อผู้รับก่อนแจกจริง</span>
+      </div>
+
+      <div class="field">
+        <span class="label">จำนวน token</span>
+        <div class="pick-row" id="amount-pick-row">
+          <button type="button" class="pick" data-amount="1">1</button>
+          <button type="button" class="pick" data-amount="3">3</button>
+          <button type="button" class="pick" data-amount="5">5</button>
+          <button type="button" class="pick" data-amount="10">10</button>
+          <button type="button" class="pick" data-amount="15">15</button>
+          <button type="button" class="pick" id="amount-custom-btn">ระบุเอง</button>
+        </div>
+        <input class="input hidden" id="amount-custom-input" type="number"
+               inputmode="numeric" min="1" step="1" placeholder="ระบุจำนวน token"
+               style="margin-top:var(--s-sm)">
+      </div>
+
+      <div class="field">
+        <span class="label">เหตุผล</span>
+        <div class="pick-row" id="reason-pick-row">
+          <button type="button" class="pick" data-reason="ตอบคำถาม">ตอบคำถาม</button>
+          <button type="button" class="pick" data-reason="ร่วมกิจกรรม">ร่วมกิจกรรม</button>
+          <button type="button" class="pick" id="reason-custom-btn">ระบุเอง</button>
+        </div>
+        <input class="input hidden" id="reason-custom-input" type="text"
+               placeholder="ระบุเหตุผล" style="margin-top:var(--s-sm)">
+      </div>
+
+      <div id="error" class="msg msg-error" role="alert" aria-live="polite"></div>
+      <div id="ok" class="msg msg-ok" role="status" aria-live="polite"></div>
+
+      <div class="action-isolated">
+        <button class="btn btn-grant btn-block" id="submit" type="submit">แจก Token</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser, fetchProfile } from './shared/auth.js';
+import { findUserByUsername, grantToken } from './shared/data.js';
+import { toFullUsername, toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์ และรอ Firebase resolve auth ให้เรียบร้อยก่อน
+const { authUser, profile } = await requireRole(['trainer']);
+
+let currentProfile = profile;
+
+/* ------------------------------------------------------------------ *
+ * แถบโควตา
+ * ------------------------------------------------------------------ *
+ * หมายเหตุ: schema ของ users/{uid} เก็บเฉพาะ tokenQuota (ค่าคงเหลือปัจจุบัน)
+ * ไม่มีฟิลด์ "โควตาเต็ม/โควตาตั้งต้น" แยกไว้ต่างหาก จึงใช้ค่าสูงสุดที่เคยเห็น
+ * ระหว่างเปิดหน้านี้เป็นตัวหาร (เริ่มจากค่าปัจจุบันตอนโหลดหน้า และขยับขึ้นได้
+ * ถ้าแอดมินเพิ่มโควตาให้ระหว่างที่หน้ายังเปิดอยู่) เพื่อให้แถบไม่ล้น 100%
+ */
+const quotaValueEl = document.getElementById('quota-value');
+const quotaFillEl = document.getElementById('quota-fill');
+const quotaWarningEl = document.getElementById('quota-warning');
+let quotaAnchorMax = null;
+
+function renderQuota(p) {
+  const remaining = Math.max(0, Number(p?.tokenQuota ?? 0));
+  if (quotaAnchorMax === null || remaining > quotaAnchorMax) {
+    quotaAnchorMax = remaining;
+  }
+  const pct = quotaAnchorMax > 0 ? Math.min(100, (remaining / quotaAnchorMax) * 100) : 0;
+  quotaValueEl.textContent = `${remaining} / ${quotaAnchorMax}`;
+  quotaFillEl.style.width = pct + '%';
+
+  const isLow = quotaAnchorMax > 0 && remaining / quotaAnchorMax < 0.2;
+  if (isLow) {
+    quotaWarningEl.textContent = `โควตาใกล้หมด — เหลือ ${remaining} token`;
+    quotaWarningEl.classList.remove('hidden');
+  } else {
+    quotaWarningEl.classList.add('hidden');
+  }
+}
+
+renderQuota(currentProfile);
+
+/* ------------------------------------------------------------------ *
+ * ออกจากระบบ
+ * ------------------------------------------------------------------ */
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+/* ------------------------------------------------------------------ *
+ * องค์ประกอบฟอร์ม
+ * ------------------------------------------------------------------ */
+const form = document.getElementById('grant-form');
+const errorEl = document.getElementById('error');
+const okEl = document.getElementById('ok');
+const submitEl = document.getElementById('submit');
+
+/* ---- ช่องรหัสประจำตัวผู้รับ + การยืนยันชื่อ ---- */
+const targetInput = document.getElementById('target-username');
+const targetHint = document.getElementById('target-hint');
+const DEFAULT_TARGET_HINT = targetHint.textContent;
+let resolvedTarget = null;
+
+async function resolveTarget(showBusyState = true) {
+  const shortCode = targetInput.value.trim();
+  if (!shortCode) {
+    resolvedTarget = null;
+    targetHint.textContent = DEFAULT_TARGET_HINT;
+    return null;
+  }
+  const uname = toFullUsername(shortCode);
+
+  if (showBusyState) targetHint.textContent = 'กำลังตรวจสอบรหัสประจำตัว...';
+
+  try {
+    const target = await findUserByUsername(uname);
+
+    if (!target) {
+      resolvedTarget = null;
+      targetHint.textContent = DEFAULT_TARGET_HINT;
+      errorEl.textContent = `ไม่พบรหัสประจำตัว "${shortCode}" ในระบบ กรุณาตรวจสอบอีกครั้ง`;
+      return null;
+    }
+
+    if (target.uid === currentProfile.uid) {
+      resolvedTarget = null;
+      targetHint.textContent = DEFAULT_TARGET_HINT;
+      errorEl.textContent = 'แจก token ให้ตัวเองไม่ได้ กรุณากรอกรหัสประจำตัวของผู้รับคนอื่น';
+      return null;
+    }
+
+    resolvedTarget = target;
+    targetHint.textContent = `ผู้รับ: ${target.fullName || '(ไม่มีชื่อในระบบ)'} (${toShortCode(target.username)})`;
+    return target;
+  } catch (e) {
+    resolvedTarget = null;
+    targetHint.textContent = DEFAULT_TARGET_HINT;
+    errorEl.textContent = e?.message || 'ตรวจสอบรหัสประจำตัวไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    return null;
+  }
+}
+
+targetInput.addEventListener('blur', () => {
+  errorEl.textContent = '';
+  resolveTarget();
+});
+targetInput.addEventListener('input', () => {
+  // แก้ช่องนี้ใหม่ -> ต้องตรวจสอบซ้ำก่อนแจกทุกครั้ง กันแจกผิดคน
+  resolvedTarget = null;
+});
+
+/* ---- ปุ่มลัดเลือกจำนวน ---- */
+const amountButtons = Array.from(document.querySelectorAll('#amount-pick-row .pick[data-amount]'));
+const amountCustomBtn = document.getElementById('amount-custom-btn');
+const amountCustomInput = document.getElementById('amount-custom-input');
+let selectedAmount = null;
+let amountIsCustom = false;
+
+function markAmountSelected(btn) {
+  [...amountButtons, amountCustomBtn].forEach((b) => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+amountButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    selectedAmount = Number(btn.dataset.amount);
+    amountIsCustom = false;
+    amountCustomInput.classList.add('hidden');
+    amountCustomInput.value = '';
+    markAmountSelected(btn);
+  });
+});
+
+amountCustomBtn.addEventListener('click', () => {
+  amountIsCustom = true;
+  selectedAmount = null;
+  amountCustomInput.classList.remove('hidden');
+  markAmountSelected(amountCustomBtn);
+  amountCustomInput.focus();
+});
+
+amountCustomInput.addEventListener('input', () => {
+  const n = Number(amountCustomInput.value);
+  selectedAmount = Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+});
+
+/* ---- ปุ่มลัดเลือกเหตุผล ---- */
+const reasonButtons = Array.from(document.querySelectorAll('#reason-pick-row .pick[data-reason]'));
+const reasonCustomBtn = document.getElementById('reason-custom-btn');
+const reasonCustomInput = document.getElementById('reason-custom-input');
+let selectedReason = null;
+let reasonIsCustom = false;
+
+function markReasonSelected(btn) {
+  [...reasonButtons, reasonCustomBtn].forEach((b) => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+reasonButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    selectedReason = btn.dataset.reason;
+    reasonIsCustom = false;
+    reasonCustomInput.classList.add('hidden');
+    reasonCustomInput.value = '';
+    markReasonSelected(btn);
+  });
+});
+
+reasonCustomBtn.addEventListener('click', () => {
+  reasonIsCustom = true;
+  selectedReason = null;
+  reasonCustomInput.classList.remove('hidden');
+  markReasonSelected(reasonCustomBtn);
+  reasonCustomInput.focus();
+});
+
+reasonCustomInput.addEventListener('input', () => {
+  selectedReason = reasonCustomInput.value.trim() || null;
+});
+
+/* ---- เคลียร์ฟอร์มหลังแจกสำเร็จ (วิทยากรแจกซ้ำหลายรอบระหว่างบรรยาย) ---- */
+function resetForm() {
+  targetInput.value = '';
+  resolvedTarget = null;
+  targetHint.textContent = DEFAULT_TARGET_HINT;
+
+  selectedAmount = null;
+  amountIsCustom = false;
+  amountCustomInput.value = '';
+  amountCustomInput.classList.add('hidden');
+  [...amountButtons, amountCustomBtn].forEach((b) => b.classList.remove('selected'));
+
+  selectedReason = null;
+  reasonIsCustom = false;
+  reasonCustomInput.value = '';
+  reasonCustomInput.classList.add('hidden');
+  [...reasonButtons, reasonCustomBtn].forEach((b) => b.classList.remove('selected'));
+
+  targetInput.focus();
+}
+
+/* ---- ยืนยันแจก ---- */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.textContent = '';
+  okEl.textContent = '';
+
+  const amount = selectedAmount;
+  if (!amount || amount <= 0) {
+    errorEl.textContent = 'กรุณาเลือกหรือระบุจำนวน token ที่จะแจก';
+    return;
+  }
+
+  const reason = selectedReason;
+  if (!reason) {
+    errorEl.textContent = 'กรุณาเลือกหรือระบุเหตุผลในการแจก';
+    return;
+  }
+
+  const targetShortCode = targetInput.value.trim();
+  if (!targetShortCode) {
+    errorEl.textContent = 'กรุณากรอกรหัสประจำตัวผู้รับ';
+    targetInput.focus();
+    return;
+  }
+  const targetUsername = toFullUsername(targetShortCode);
+
+  submitEl.disabled = true;
+  submitEl.textContent = 'กำลังแจก...';
+
+  try {
+    // ตรวจสอบผู้รับซ้ำอีกครั้งก่อนยิงจริงเสมอ กันข้อมูลค้างจากการพิมพ์แก้ไขภายหลัง
+    const target = await resolveTarget(false);
+    if (!target) {
+      if (!errorEl.textContent) {
+        errorEl.textContent = 'กรุณาตรวจสอบรหัสประจำตัวผู้รับให้ถูกต้องก่อนแจก';
+      }
+      return;
+    }
+
+    await grantToken({
+      actorUid: currentProfile.uid,
+      targetUsername,
+      amount,
+      reason,
+      reasonSource: reasonIsCustom ? 'custom' : 'preset'
+    });
+
+    okEl.textContent = `แจก ${amount} token ให้ ${target.fullName || toShortCode(target.username)} เรียบร้อยแล้ว`;
+    resetForm();
+
+    // รีเฟรชแถบโควตา — อัปเดตทันทีแบบ optimistic แล้วซิงก์ค่าจริงจาก Firestore ตาม
+    currentProfile = { ...currentProfile, tokenQuota: Math.max(0, Number(currentProfile.tokenQuota ?? 0) - amount) };
+    renderQuota(currentProfile);
+    try {
+      const fresh = await fetchProfile(currentProfile.uid);
+      if (fresh) {
+        currentProfile = fresh;
+        renderQuota(currentProfile);
+      }
+    } catch (_) {
+      /* เน็ตหลุดตอนรีเฟรชโควตา ไม่เป็นไร ค่าที่คำนวณไว้ยังใช้แสดงผลได้ */
+    }
+  } catch (err) {
+    // err.message จาก data.js เป็นภาษาไทยพร้อมแสดงผลอยู่แล้ว
+    // (ครอบคลุม data/quota-exceeded, data/target-not-found, data/self-grant ฯลฯ)
+    errorEl.textContent = err?.message || 'แจก token ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+  } finally {
+    submitEl.disabled = false;
+    submitEl.textContent = 'แจก Token';
+  }
+});
+</script>
+
+</body>
+</html>

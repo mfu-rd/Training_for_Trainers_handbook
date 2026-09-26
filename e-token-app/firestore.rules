@@ -1,0 +1,165 @@
+// =====================================================================
+//  Firestore Security Rules — ระบบแจก e-Token (TFT)
+//  โปรเจกต์ Firebase: tft-e-token
+// =====================================================================
+//
+//  *** ยังไม่ได้ deploy กฎชุดนี้ขึ้น Firebase ***
+//  ต้อง deploy ด้วยมือก่อนใช้งานจริง:
+//
+//      firebase deploy --only firestore:rules
+//
+//  (หรือวางเนื้อหาไฟล์นี้ใน Firebase Console > Firestore Database > Rules
+//   แล้วกด Publish ถ้ายังไม่ได้ติดตั้ง Firebase CLI)
+//
+// ---------------------------------------------------------------------
+//  ข้อกำหนดที่ห้ามพลาด (SCOPE.md / SPEC.md):
+//  ผู้เข้าร่วม (participant) ต้องเขียนแก้ `tokenBalance`, `tokenQuota`
+//  หรือ `role` ของตัวเองไม่ได้เด็ดขาด มิฉะนั้นคนที่เปิด dev tools
+//  จะแก้ยอด token ตัวเองผ่าน Firestore client SDK ได้ตรง ๆ
+//
+// ---------------------------------------------------------------------
+//  *** ขอบเขตของการป้องกัน (อ่านก่อนคิดว่ากฎนี้ "กันได้ทุกอย่าง") ***
+//
+//  กฎชุดนี้เป็น defense-in-depth แบบ "best effort" ไม่ใช่การบังคับความถูกต้อง
+//  ของจำนวนเงินแบบสมบูรณ์ กฎบอกได้แค่ว่า "ใครแก้ฟิลด์ไหนได้บ้าง และทิศทาง
+//  ของยอดถูกต้องไหม" แต่บอกไม่ได้ว่า "รายการ grant ใบนี้เพิ่มยอดตรงกับ
+//  amount ที่บันทึกจริงหรือเปล่า" — ความถูกต้องระดับนั้นอาศัยการที่ client
+//  ของวิทยากร/แอดมินรันฟังก์ชันใน shared/data.js ที่ตรวจสอบและทำงานเป็น
+//  transaction เดียวเท่านั้น
+//
+//  การบังคับฝั่งเซิร์ฟเวอร์เต็มรูปแบบต้องใช้ Cloud Functions ซึ่งอยู่นอก
+//  ขอบเขตของโปรเจกต์นี้ (ตัดสินใจไว้แล้วว่าสแตกเป็น static ไม่มี build step
+//  ไม่มีเซิร์ฟเวอร์ — ดู PRODUCT.md > Stack) ความเสี่ยงที่เหลืออยู่จึงเป็น
+//  "วิทยากร/แอดมินที่มีบัญชีจริงและตั้งใจโกงผ่าน console" ซึ่งยอมรับได้ใน
+//  บริบทเครื่องมือภายในทีมจัดงานที่มีผู้ใช้กลุ่มเล็กและมี audit trail ครบ
+// =====================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // อ่าน role จากเอกสาร users ของ uid ที่ระบุ
+    function getRole(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role;
+    }
+
+    function myRole() {
+      return getRole(request.auth.uid);
+    }
+
+    function isAdmin() {
+      return isSignedIn() && myRole() == 'admin';
+    }
+
+    function isTrainer() {
+      return isSignedIn() && myRole() == 'trainer';
+    }
+
+    // วิทยากรและแอดมิน = "เจ้าหน้าที่" ค้นหาบัญชีผู้เข้าร่วมด้วยรหัสประจำตัวได้
+    function isStaff() {
+      return isAdmin() || isTrainer();
+    }
+
+    // ฟิลด์ที่ถูกแก้ในคำขอเขียนครั้งนี้
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ---------- users/{uid} ----------
+    match /users/{uid} {
+
+      // อ่าน: เจ้าของเอกสาร หรือ เจ้าหน้าที่ (วิทยากรต้องค้นหาผู้รับด้วย username ได้)
+      allow read: if isSignedIn() && (request.auth.uid == uid || isStaff());
+
+      // สร้าง: แอดมินเท่านั้น (ไม่มีระบบสมัครสมาชิกเอง — SPEC.md)
+      allow create: if isAdmin();
+
+      allow update: if
+        // (1) แอดมินแก้ได้ทุกฟิลด์ (ปรับโควตา, แก้ชื่อ, แก้ยอดตอน void ฯลฯ)
+        isAdmin()
+
+        // (2) วิทยากรลดโควตา "ของตัวเอง" ได้อย่างเดียว — ห้ามเพิ่มเอง
+        || (
+          isTrainer()
+          && request.auth.uid == uid
+          && changedKeys().hasOnly(['tokenQuota'])
+          && request.resource.data.tokenQuota is number
+          && request.resource.data.tokenQuota >= 0
+          && request.resource.data.tokenQuota <= resource.data.tokenQuota
+        )
+
+        // (3) วิทยากรเพิ่ม tokenBalance ให้ "คนอื่น" ได้อย่างเดียว
+        //     แตะฟิลด์อื่นไม่ได้เลย และลดยอดคนอื่นไม่ได้ (การหักเป็นงานแอดมิน)
+        || (
+          isTrainer()
+          && request.auth.uid != uid
+          && changedKeys().hasOnly(['tokenBalance'])
+          && request.resource.data.tokenBalance is number
+          && request.resource.data.tokenBalance >= resource.data.tokenBalance
+        )
+
+        // (4) ผู้ใช้ทุกคนปิดธง mustChangePassword ของตัวเองได้ หลังเปลี่ยนรหัสผ่านสำเร็จ
+        //     — เป็นฟิลด์เดียวที่ self-service แก้ได้ และแก้ได้ทางเดียวคือเป็น false
+        || (
+          isSignedIn()
+          && request.auth.uid == uid
+          && changedKeys().hasOnly(['mustChangePassword'])
+          && request.resource.data.mustChangePassword == false
+        );
+
+      // ไม่ลบบัญชีผ่าน client (ถ้าต้องลบจริง ให้แอดมินทำที่ Firebase Console)
+      allow delete: if false;
+    }
+
+    // ---------- transactions/{txId} ----------
+    match /transactions/{txId} {
+
+      // อ่าน: ผู้ทำรายการ, ผู้ถูกกระทบยอด, วิทยากรที่ถูกปรับโควตา หรือแอดมิน
+      // ใช้ .get(field, default) เพราะบาง type ไม่มีฟิลด์นั้น (เช่น quotaAdjust ไม่มี targetUid)
+      allow read: if isSignedIn() && (
+        resource.data.actorUid == request.auth.uid
+        || resource.data.get('targetUid', '') == request.auth.uid
+        || resource.data.get('trainerUid', '') == request.auth.uid
+        || isAdmin()
+      );
+
+      // สร้าง: ต้องเซ็นชื่อตัวเองเป็น actorUid และเริ่มที่สถานะ active เสมอ
+      //   - วิทยากร สร้างได้เฉพาะ type 'grant'
+      //   - แอดมิน  สร้างได้ 'deduct' และ 'quotaAdjust'
+      allow create: if isSignedIn()
+        && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.status == 'active'
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 0
+        && (
+          (isTrainer() && request.resource.data.type == 'grant')
+          || (isAdmin() && request.resource.data.type in ['deduct', 'quotaAdjust'])
+        );
+
+      // แก้ไข: อนุญาตเฉพาะ "การยกเลิก" โดยแอดมินเท่านั้น
+      //   - ต้องมาจากสถานะ active -> voided (void ซ้ำไม่ได้)
+      //   - แตะได้เฉพาะฟิลด์ที่เกี่ยวกับการยกเลิก ฟิลด์เดิมของรายการห้ามเปลี่ยน
+      //     (จำนวน/ประเภท/ผู้ทำรายการ ต้องคงไว้เพื่อ audit trail)
+      allow update: if isAdmin()
+        && resource.data.status == 'active'
+        && request.resource.data.status == 'voided'
+        && changedKeys().hasOnly(['status', 'voidedBy', 'voidedAt', 'voidReason'])
+        && request.resource.data.voidedBy == request.auth.uid;
+
+      // ห้ามลบรายการจริงเด็ดขาด — ยกเลิกด้วย status: 'voided' เท่านั้น (SPEC.md)
+      allow delete: if false;
+    }
+
+    // ---------- ปิดทุกอย่างที่เหลือ ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

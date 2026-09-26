@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-admin">
+
+<main class="layout-form">
+  <header style="margin-bottom:var(--s-xl)">
+    <div class="row row-between">
+      <span class="label" style="margin:0">Training for the Trainers</span>
+      <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+    </div>
+    <h1 class="headline" style="margin-top:var(--s-xs)">ระบบแจก e-Token</h1>
+    <p class="muted" style="margin:var(--s-xs) 0 0">เข้าสู่ระบบด้วยรหัสประจำตัวและรหัสผ่านที่ได้รับจากทีมผู้จัด</p>
+  </header>
+
+  <section class="card">
+    <form id="login-form" novalidate>
+      <div class="field">
+        <label class="label" for="username">รหัสประจำตัว (2 หลักท้าย)</label>
+        <input class="input" id="username" name="username" type="text"
+               inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2"
+               autocomplete="username" autocapitalize="off" spellcheck="false"
+               placeholder="เช่น 01" required>
+      </div>
+
+      <div class="field">
+        <label class="label" for="password">รหัสผ่าน</label>
+        <input class="input" id="password" name="password" type="password"
+               inputmode="numeric" autocomplete="current-password" placeholder="รหัสผ่านชั่วคราว" required>
+        <span class="hint">รหัสผ่านชั่วคราวเป็นตัวเลข 6 หลักที่ได้รับจากสลิป</span>
+      </div>
+
+      <!-- ข้อความเตือนด้านความปลอดภัยตาม SCOPE.md — ต้องปรากฏในหน้าล็อกอิน -->
+      <div class="msg msg-warn" role="note" style="margin:var(--s-md) 0">
+        รหัสผ่านนี้เป็นรหัสชั่วคราว ห้ามใช้รหัสผ่านส่วนตัวหรือรหัสที่ใช้ซ้ำกับบัญชีอื่นเด็ดขาด
+        เพราะระบบนี้ไม่ได้ทำระบบรักษาความปลอดภัยระดับสูง (ไม่มี 2FA ไม่มี rate-limit เข้มงวด)
+      </div>
+
+      <div id="error" class="msg msg-error" role="alert" aria-live="polite"></div>
+
+      <div class="action-isolated">
+        <button class="btn btn-admin btn-block" id="submit" type="submit">เข้าสู่ระบบ</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { signIn, getRoleHomePage, onAuthChange } from './shared/auth.js';
+import { toFullUsername } from './shared/firebase-init.js';
+
+const form = document.getElementById('login-form');
+const usernameEl = document.getElementById('username');
+const passwordEl = document.getElementById('password');
+const errorEl = document.getElementById('error');
+const submitEl = document.getElementById('submit');
+
+/** ส่งผู้ใช้ไปหน้าที่ควรไปหลังล็อกอิน */
+function routeAfterLogin(profile) {
+  // ยังไม่เคยเปลี่ยนรหัสผ่าน -> แวะหน้าเปลี่ยนรหัสผ่านก่อน (แนะนำ ไม่บังคับ — หน้านั้นมีปุ่ม "ข้าม")
+  if (profile?.mustChangePassword) {
+    location.replace('change-password.html');
+    return;
+  }
+  location.replace(getRoleHomePage(profile?.role));
+}
+
+// ถ้าล็อกอินค้างอยู่แล้ว ไม่ต้องให้กรอกซ้ำ
+const unsub = onAuthChange(({ authUser, profile }) => {
+  if (authUser && profile) {
+    unsub();
+    routeAfterLogin(profile);
+  }
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.textContent = '';
+  submitEl.disabled = true;
+  submitEl.textContent = 'กำลังเข้าสู่ระบบ...';
+
+  try {
+    const { profile } = await signIn(toFullUsername(usernameEl.value), passwordEl.value);
+    routeAfterLogin(profile);
+  } catch (err) {
+    errorEl.textContent = err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    passwordEl.value = '';
+    passwordEl.focus();
+    submitEl.disabled = false;
+    submitEl.textContent = 'เข้าสู่ระบบ';
+  }
+});
+</script>
+
+</body>
+</html>

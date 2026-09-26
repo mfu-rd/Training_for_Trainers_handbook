@@ -1,3 +1,12 @@
 # Local editor / tooling — not part of the handbook content
 .obsidian/
 .claude/
+skills-lock.json
+
+# Impeccable skill's ephemeral review artifacts (design.json/surfaces/ ARE tracked on purpose)
+**/.impeccable/critique/
+
+# ข้อมูลส่วนตัว/PII จริงของผู้เข้าร่วม (ชื่อ อีเมล เบอร์โทร) — ห้าม push ขึ้น public repo เด็ดขาด
+จับคู่บัดดี้.xlsx
+รายชื่อผู้ยืนยันเข้าร่วมโครงการฝึกอบรม.csv
+รายชื่อผู้ยืนยันเข้าร่วมโครงการฝึกอบรม.xlsx

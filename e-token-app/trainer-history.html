@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ประวัติการแจก — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-grant">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token</span>
+  <nav class="nav-chips">
+    <a class="nav-chip" href="grant.html">แจก Token</a>
+    <a class="nav-chip active" href="trainer-history.html">ประวัติการแจก</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="signout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-data">
+  <header class="stack-sm" style="margin:var(--s-xl) 0">
+    <span class="label">วิทยากร</span>
+    <h1 class="headline">ประวัติการแจก Token</h1>
+    <p class="muted" style="margin:var(--s-xs) 0 0">รายการ token ทั้งหมดที่คุณแจกไป เรียงจากล่าสุดไปเก่าสุด</p>
+  </header>
+
+  <div id="state-loading" class="loading">กำลังโหลดประวัติ...</div>
+  <div id="state-empty" class="empty hidden">ยังไม่มีรายการที่คุณแจกไป — ลองไปที่หน้า "แจก Token" เพื่อเริ่มแจกครั้งแรก</div>
+  <div id="state-error" class="empty hidden"></div>
+
+  <div class="table-wrap hidden" id="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>วันเวลา</th>
+          <th>ผู้รับ</th>
+          <th class="col-num">จำนวน</th>
+          <th>เหตุผล</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { listTransactionsByActor, listAllUsers, formatTimestamp } from './shared/data.js';
+import { toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์ และรอ Firebase resolve auth ให้เรียบร้อยก่อน
+const { authUser, profile } = await requireRole(['trainer']);
+
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+const loadingEl = document.getElementById('state-loading');
+const emptyEl = document.getElementById('state-empty');
+const errorEl = document.getElementById('state-error');
+const tableWrapEl = document.getElementById('table-wrap');
+const tableBodyEl = document.getElementById('table-body');
+
+function showOnly(el) {
+  [loadingEl, emptyEl, errorEl, tableWrapEl].forEach((e) => e.classList.add('hidden'));
+  el.classList.remove('hidden');
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function renderRows(transactions, userByUid) {
+  tableBodyEl.innerHTML = transactions.map((t) => {
+    const voided = t.status === 'voided';
+    const target = userByUid.get(t.targetUid);
+    const targetLabel = target
+      ? `${escapeHtml(target.fullName || toShortCode(target.username))}`
+      : (t.targetUid ? escapeHtml(t.targetUid) : '—');
+
+    const pillHtml = voided
+      ? '<span class="pill pill-voided">ยกเลิกแล้ว</span>'
+      : '<span class="pill pill-grant">แจก</span>';
+
+    return `
+      <tr class="${voided ? 'is-voided' : ''}">
+        <td>${escapeHtml(formatTimestamp(t.createdAt))}</td>
+        <td>${targetLabel}</td>
+        <td class="col-num">
+          <span class="row" style="justify-content:flex-end; gap:6px; flex-wrap:nowrap">
+            ${pillHtml}
+            <span class="num">${escapeHtml(t.amount ?? '')}</span>
+          </span>
+        </td>
+        <td>${escapeHtml(t.reason || '—')}</td>
+      </tr>`;
+  }).join('');
+}
+
+async function load() {
+  showOnly(loadingEl);
+  try {
+    const [transactions, users] = await Promise.all([
+      listTransactionsByActor(profile.uid),
+      listAllUsers()
+    ]);
+
+    if (!transactions.length) {
+      showOnly(emptyEl);
+      return;
+    }
+
+    const userByUid = new Map(users.map((u) => [u.uid, u]));
+    renderRows(transactions, userByUid);
+    showOnly(tableWrapEl);
+  } catch (err) {
+    // Firestore query ที่มี where + orderBy ต้องมี composite index —
+    // ก่อนสร้าง index ครั้งแรก Firestore จะโยน error code 'failed-precondition'
+    // (ดู shared/README.md ข้อ 5) — แสดงข้อความไทยที่เข้าใจง่ายแทนข้อความดิบภาษาอังกฤษ
+    if (err?.code === 'failed-precondition') {
+      errorEl.textContent = 'กำลังเตรียมระบบ — กรุณาลองใหม่อีกครั้งในอีกสักครู่ (หากยังไม่หายกรุณาแจ้งแอดมิน)';
+    } else {
+      errorEl.textContent = err?.message || 'โหลดประวัติไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    }
+    showOnly(errorEl);
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>

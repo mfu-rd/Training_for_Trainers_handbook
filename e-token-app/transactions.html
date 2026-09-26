@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ประวัติรายการ — ระบบแจก e-Token TFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Anuphan:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/styles.css">
+</head>
+<body class="accent-admin">
+
+<header class="appbar">
+  <span class="brand">ระบบแจก e-Token TFT</span>
+  <nav class="nav-chips">
+    <a class="nav-chip" href="admin-overview.html">ภาพรวม</a>
+    <a class="nav-chip" href="deduct.html">หัก Token</a>
+    <a class="nav-chip active" href="transactions.html">รายการ</a>
+    <a class="nav-chip" href="trainer-quota.html">โควตาวิทยากร</a>
+    <a class="nav-chip" href="user-management.html">จัดการบัญชี</a>
+    <a class="nav-chip" href="export.html">Export</a>
+  </nav>
+  <button type="button" class="theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">☀️</button>
+  <button class="btn" id="signout-btn" type="button">ออกจากระบบ</button>
+</header>
+
+<main class="layout-data">
+  <header style="margin-bottom:var(--s-xl)">
+    <span class="label">แอดมิน</span>
+    <h1 class="headline">ประวัติรายการทั้งหมด</h1>
+    <p class="muted" style="margin:var(--s-xs) 0 0">
+      ดูรายการแจก/หัก/ปรับโควตาทั้งหมดในระบบ และยกเลิกรายการที่ผิดพลาดได้ (ยกเลิก = บันทึกเป็นรายการที่ถูกยกเลิก ไม่ใช่การลบทิ้ง)
+    </p>
+  </header>
+
+  <div id="msg" class="msg" role="alert" aria-live="polite" style="margin-bottom:var(--s-md)"></div>
+  <div id="loading" class="loading">กำลังโหลดประวัติรายการ...</div>
+  <div id="empty" class="empty" hidden>ยังไม่มีรายการในระบบ</div>
+
+  <div class="table-wrap" id="table-wrap" hidden>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>วันเวลา</th>
+          <th>ประเภท</th>
+          <th>ผู้ทำรายการ</th>
+          <th>ผู้ได้รับผลกระทบ</th>
+          <th class="col-num">จำนวน</th>
+          <th>รายละเอียด</th>
+          <th>สถานะ</th>
+          <th>การจัดการ</th>
+        </tr>
+      </thead>
+      <tbody id="tx-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<script type="module">
+import './shared/theme.js';
+import { requireRole, signOutUser } from './shared/auth.js';
+import { listAllTransactions, listAllUsers, voidTransaction, formatTimestamp } from './shared/data.js';
+import { toShortCode } from './shared/firebase-init.js';
+
+// บรรทัดแรกเสมอ — กันคนที่ไม่มีสิทธิ์
+const { authUser } = await requireRole(['admin']);
+
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  await signOutUser();
+  location.replace('login.html');
+});
+
+const msgEl = document.getElementById('msg');
+const loadingEl = document.getElementById('loading');
+const emptyEl = document.getElementById('empty');
+const tableWrapEl = document.getElementById('table-wrap');
+const tbodyEl = document.getElementById('tx-body');
+
+let userByUid = new Map();
+
+function showMsg(text, kind) {
+  msgEl.textContent = text;
+  msgEl.classList.remove('msg-ok', 'msg-error', 'msg-warn');
+  if (kind) msgEl.classList.add(kind);
+}
+
+function nameOf(uid) {
+  if (!uid) return '-';
+  const u = userByUid.get(uid);
+  return u ? `${u.fullName || '(ไม่มีชื่อ)'} (${toShortCode(u.username)})` : `ผู้ใช้ที่ถูกลบ (${uid.slice(0, 6)}…)`;
+}
+
+const TYPE_LABEL = { grant: 'แจก', deduct: 'หัก', quotaAdjust: 'ปรับโควตา' };
+const TYPE_PILL = { grant: 'pill-grant', deduct: 'pill-deduct', quotaAdjust: 'pill-admin' };
+
+function amountDisplay(tx) {
+  const amt = Number(tx.amount ?? 0);
+  if (tx.type === 'grant') return `+${amt}`;
+  if (tx.type === 'deduct') return `-${amt}`;
+  return String(amt); // quotaAdjust เก็บเป็นค่าสัมบูรณ์ ไม่ใช่ผลต่าง ห้ามใส่เครื่องหมาย
+}
+
+function detailDisplay(tx) {
+  if (tx.type === 'grant') {
+    const src = tx.reasonSource === 'custom' ? ' (ระบุเอง)' : '';
+    return `${tx.reason || '-'}${src}`;
+  }
+  if (tx.type === 'deduct') {
+    return tx.itemLabel || '-';
+  }
+  if (tx.type === 'quotaAdjust') {
+    // ห้ามแสดงเป็น "+N" — ค่าที่เก็บเป็นค่าสัมบูรณ์ตาม README ข้อ 5
+    const prev = tx.previousQuota !== undefined ? ` (เดิม ${tx.previousQuota})` : '';
+    return `ตั้งโควตาเป็น ${tx.amount}${prev}`;
+  }
+  return '-';
+}
+
+function actionCell(tx) {
+  if (tx.status === 'voided') {
+    return `<span class="muted">ยกเลิกแล้ว${tx.voidReason ? ` — ${escapeHtml(tx.voidReason)}` : ''}</span>`;
+  }
+  if (tx.type === 'quotaAdjust') {
+    return `<span class="hint">ยกเลิกไม่ได้ — ไปตั้งโควตาใหม่ที่ <a href="trainer-quota.html">หน้าโควตาวิทยากร</a> แทน</span>`;
+  }
+  return `<button type="button" class="btn btn-deduct" data-void-id="${tx.id}">ยกเลิกรายการ</button>`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function render(transactions) {
+  tbodyEl.innerHTML = '';
+  if (!transactions.length) {
+    emptyEl.hidden = false;
+    tableWrapEl.hidden = true;
+    return;
+  }
+  emptyEl.hidden = true;
+  tableWrapEl.hidden = false;
+
+  for (const tx of transactions) {
+    const tr = document.createElement('tr');
+    if (tx.status === 'voided') tr.classList.add('is-voided');
+
+    const affected = tx.type === 'quotaAdjust' ? nameOf(tx.trainerUid) : nameOf(tx.targetUid);
+    const statusPill = tx.status === 'voided'
+      ? `<span class="pill pill-voided">ยกเลิกแล้ว</span>`
+      : `<span class="muted">ใช้งานอยู่</span>`;
+
+    tr.innerHTML = `
+      <td>${formatTimestamp(tx.createdAt)}</td>
+      <td><span class="pill ${TYPE_PILL[tx.type] || ''}">${TYPE_LABEL[tx.type] || tx.type}</span></td>
+      <td>${nameOf(tx.actorUid)}</td>
+      <td>${affected}</td>
+      <td class="col-num num">${amountDisplay(tx)}</td>
+      <td>${escapeHtml(detailDisplay(tx))}</td>
+      <td>${statusPill}</td>
+      <td>${actionCell(tx)}</td>
+    `;
+    tbodyEl.appendChild(tr);
+  }
+}
+
+let allTransactions = [];
+
+async function loadAll() {
+  loadingEl.hidden = false;
+  tableWrapEl.hidden = true;
+  emptyEl.hidden = true;
+  try {
+    const [users, transactions] = await Promise.all([listAllUsers(), listAllTransactions()]);
+    userByUid = new Map(users.map((u) => [u.uid, u]));
+    allTransactions = transactions;
+    render(allTransactions);
+  } catch (err) {
+    if (err?.code === 'failed-precondition') {
+      showMsg('กำลังเตรียมระบบ (สร้าง index) กรุณารอสักครู่แล้วโหลดหน้านี้ใหม่', 'msg-warn');
+    } else {
+      showMsg(err?.message || 'โหลดประวัติรายการไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่', 'msg-error');
+    }
+  } finally {
+    loadingEl.hidden = true;
+  }
+}
+
+tbodyEl.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-void-id]');
+  if (!btn) return;
+
+  const transactionId = btn.dataset.voidId;
+  const voidReason = prompt('เหตุผลที่ยกเลิกรายการนี้ (จำเป็น):', '');
+  if (voidReason === null) return; // กดยกเลิก prompt
+  if (!voidReason.trim()) {
+    showMsg('กรุณาระบุเหตุผลก่อนยกเลิกรายการ', 'msg-error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'กำลังยกเลิก...';
+  showMsg('', null);
+
+  try {
+    await voidTransaction({ actorUid: authUser.uid, transactionId, voidReason: voidReason.trim() });
+    showMsg('ยกเลิกรายการเรียบร้อยแล้ว', 'msg-ok');
+    await loadAll();
+  } catch (err) {
+    if (err?.code === 'data/already-voided' || err?.code === 'data/insufficient-balance') {
+      showMsg(err.message, 'msg-error');
+    } else {
+      showMsg(err?.message || 'ยกเลิกรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'msg-error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'ยกเลิกรายการ';
+  }
+});
+
+await loadAll();
+</script>
+
+</body>
+</html>
