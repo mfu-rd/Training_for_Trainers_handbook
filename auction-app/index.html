@@ -171,13 +171,21 @@
   @keyframes floatBob2{ 0%,100%{ transform:translateY(0) rotate(4deg); } 50%{ transform:translateY(10px) rotate(-4deg); } }
 
   .auction-stage{
-    position:relative; z-index:1; width:100%; max-width:1600px; overflow:hidden;
+    position:relative; z-index:1; width:100%; max-width:1600px; overflow:visible;
     display:flex; flex-wrap:nowrap; align-items:center; justify-content:center;
     gap:clamp(40px,6vw,88px);
     padding:12px 40px;
   }
   @media (max-width:760px){
     .auction-stage{ flex-direction:column; gap:26px; max-width:420px; padding:12px; }
+  }
+  .auction-stage.shake{ animation:stageShake .4s ease-in-out; }
+  @keyframes stageShake{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-7px,3px); }
+    40%{ transform:translate(6px,-4px); }
+    60%{ transform:translate(-5px,3px); }
+    80%{ transform:translate(4px,-2px); }
   }
 
   .showcase{ position:relative; flex:0 1 640px; display:flex; justify-content:center; }
@@ -274,16 +282,21 @@
   .odo-strip span{ display:flex; align-items:center; justify-content:center; height:1em; }
   .price.bump .odo-digit-wrap:not(.leading){ animation:priceBump .2s ease-out; }
   @keyframes priceBump{ 0%{ transform:translateY(-.05em); } 100%{ transform:translateY(0); } }
-  .price.struck{ animation:priceStrike .65s var(--ease-pop); }
+  .price.struck{ animation:priceStrike .8s var(--ease-pop); }
   @keyframes priceStrike{
     0%{ transform:scale(1); }
-    35%{ transform:scale(1.14); text-shadow:0 10px 26px rgba(0,0,0,.65); }
+    35%{ transform:scale(1.28); text-shadow:0 14px 34px rgba(0,0,0,.7); }
+    60%{ transform:scale(1.05); }
     100%{ transform:scale(1); text-shadow:0 4px 16px rgba(0,0,0,.5); }
   }
 
   .sold-tag{ display:none; margin-top:clamp(10px,2.4vh,22px); width:100%; }
-  .sold-tag.show{ display:block; animation:soldIn .5s var(--ease-pop); }
-  @keyframes soldIn{ from{ opacity:0; transform:translateY(10px) scale(.97); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .sold-tag.show{ display:block; animation:soldIn .7s var(--ease-pop); }
+  @keyframes soldIn{
+    0%{ opacity:0; transform:translateY(20px) scale(.8) rotate(-3deg); }
+    55%{ opacity:1; transform:translateY(-6px) scale(1.06) rotate(1.5deg); }
+    100%{ opacity:1; transform:translateY(0) scale(1) rotate(0deg); }
+  }
   .sold-banner{
     background:linear-gradient(90deg,var(--pink),var(--orange));
     border-radius:18px; padding:16px 20px;
@@ -330,11 +343,25 @@
   .save-warn.show{ display:inline-block; animation:captureIn .3s var(--ease-pop); }
 
   .flash{
-    position:absolute; inset:-10%; background:radial-gradient(circle at 50% 45%,rgba(236,72,153,.45),transparent 60%);
+    position:absolute; inset:-20%;
+    background:radial-gradient(circle at 50% 45%, rgba(251,191,36,.6) 0%, rgba(236,72,153,.5) 32%, rgba(139,92,246,.3) 55%, transparent 72%);
     opacity:0; pointer-events:none; z-index:4;
   }
-  .flash.go{ animation:flashPulse .6s ease-out; }
-  @keyframes flashPulse{ 0%{opacity:1;} 100%{opacity:0;} }
+  .flash.go{ animation:flashPulse .7s ease-out; }
+  @keyframes flashPulse{ 0%{opacity:1; transform:scale(.85);} 100%{opacity:0; transform:scale(1.15);} }
+
+  .shockwave{ position:absolute; inset:0; z-index:4; pointer-events:none; display:flex; align-items:center; justify-content:center; }
+  .shockwave .ring{
+    position:absolute; width:140px; height:140px; border-radius:50%;
+    border:5px solid var(--pink); opacity:0;
+  }
+  .shockwave.go .ring{ animation:ringPulse 1s ease-out; }
+  .shockwave.go .r2{ animation-delay:.13s; border-color:var(--orange); }
+  .shockwave.go .r3{ animation-delay:.26s; border-color:var(--yellow); }
+  @keyframes ringPulse{
+    0%{ transform:scale(.25); opacity:.95; }
+    100%{ transform:scale(3.6); opacity:0; }
+  }
 
   .hammer{
     position:absolute; width:clamp(90px,14vw,220px); height:clamp(90px,14vw,220px);
@@ -372,7 +399,8 @@
   @media (prefers-reduced-motion:reduce){
     .ambient, .floaty, .floaty-emoji, .stage-tag{ animation:none!important; }
     .frame.enter, .price.bump .odo-digit-wrap:not(.leading), .price.struck,
-    .sold-tag.show, .name-capture.show, .hammer.go, .flash.go, .item-row{ animation:none!important; }
+    .sold-tag.show, .name-capture.show, .hammer.go, .flash.go, .item-row,
+    .auction-stage.shake, .shockwave.go .ring{ animation:none!important; }
     .odo-strip, .odo-digit-wrap, .odo-comma-wrap{ transition:none!important; }
   }
 </style>
@@ -479,6 +507,11 @@
         </div>
 
         <div class="flash" id="flash"></div>
+        <div class="shockwave" id="shockwave" aria-hidden="true">
+          <span class="ring r1"></span>
+          <span class="ring r2"></span>
+          <span class="ring r3"></span>
+        </div>
         <canvas id="confetti-canvas"></canvas>
         <svg class="hammer" id="hammer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4l6 6-3.5 3.5-6-6L14 4z"/><path d="M3 21l7.5-7.5"/><path d="M9 12.5l2.5 2.5"/></svg>
       </div>
@@ -1043,6 +1076,13 @@
   frameEl.addEventListener("animationend", function(e){
     if(e.animationName === "frameIn") frameEl.classList.remove("enter");
   });
+  var stageEl = document.getElementById("stage");
+  stageEl.addEventListener("animationend", function(e){
+    if(e.animationName === "stageShake") stageEl.classList.remove("shake");
+  });
+  document.getElementById("shockwave").addEventListener("animationend", function(e){
+    if(e.animationName === "ringPulse") this.classList.remove("go");
+  });
 
   function celebrate(){
     var hammer = document.getElementById("hammer");
@@ -1051,6 +1091,9 @@
       playSoldSound();
       var flash = document.getElementById("flash");
       flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
+      var shockwave = document.getElementById("shockwave");
+      shockwave.classList.remove("go"); void shockwave.offsetWidth; shockwave.classList.add("go");
+      stageEl.classList.remove("shake"); void stageEl.offsetWidth; stageEl.classList.add("shake");
       priceEl.classList.remove("struck"); void priceEl.offsetWidth; priceEl.classList.add("struck");
       runConfetti();
     }, 340);
@@ -1067,23 +1110,29 @@
     confettiCanvas.height = stage.clientHeight;
   }
   var colors = ["#2dd4a0","#ec4899","#fb923c","#fbbf24","#8b5cf6"];
-  function runConfetti(){
-    sizeCanvas();
-    confettiParticles = [];
-    for(var i=0;i<140;i++){
+  var SHAPES = ["square","circle","ribbon"];
+  function spawnConfettiBurst(count, spread){
+    for(var i=0;i<count;i++){
       confettiParticles.push({
-        x: confettiCanvas.width/2 + (Math.random()-0.5)*40,
+        x: confettiCanvas.width/2 + (Math.random()-0.5)*spread,
         y: confettiCanvas.height*0.35,
-        vx: (Math.random()-0.5)*9,
-        vy: -Math.random()*7-3,
-        size: Math.random()*6+3,
+        vx: (Math.random()-0.5)*11,
+        vy: -Math.random()*8-3,
+        size: Math.random()*7+3,
+        shape: SHAPES[Math.floor(Math.random()*SHAPES.length)],
         color: colors[Math.floor(Math.random()*colors.length)],
         rot: Math.random()*Math.PI*2,
-        vr: (Math.random()-0.5)*0.3,
+        vr: (Math.random()-0.5)*0.35,
         life: 1
       });
     }
     if(!confettiRunning){ confettiRunning=true; requestAnimationFrame(tickConfetti); }
+  }
+  function runConfetti(){
+    sizeCanvas();
+    confettiParticles = [];
+    spawnConfettiBurst(180, 50);
+    setTimeout(function(){ spawnConfettiBurst(100, 90); }, 160);
   }
   function tickConfetti(){
     confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
@@ -1098,7 +1147,15 @@
         confettiCtx.translate(p.x,p.y);
         confettiCtx.rotate(p.rot);
         confettiCtx.fillStyle = p.color;
-        confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size);
+        if(p.shape === "circle"){
+          confettiCtx.beginPath();
+          confettiCtx.arc(0, 0, p.size/2, 0, Math.PI*2);
+          confettiCtx.fill();
+        } else if(p.shape === "ribbon"){
+          confettiCtx.fillRect(-p.size/2, -p.size*0.85, p.size*0.6, p.size*1.7);
+        } else {
+          confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size);
+        }
         confettiCtx.restore();
       }
     });
