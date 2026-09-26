@@ -44,7 +44,9 @@
     display:flex; align-items:center; gap:8px;
     padding:10px 16px; background:var(--bg2);
     border-bottom:1px solid var(--border);
+    transition:opacity .35s var(--ease-pop), transform .35s var(--ease-pop);
   }
+  .topnav.nav-hidden{ opacity:0; transform:translateY(-14px); pointer-events:none; }
   .topnav .brand{font-weight:800; color:var(--gold); margin-right:auto; letter-spacing:.3px;}
   .topnav button{
     background:transparent; color:var(--muted); border:1px solid var(--border);
@@ -418,7 +420,7 @@
       <div id="item-list"></div>
       <div class="tip-box">
         <span class="tip-pill">TIP</span>
-        <p>กด "ประมูลสด" ด้านบนเพื่อเริ่มงาน — จอนั้นควบคุมด้วยคีย์บอร์ดล้วน ไม่มีปุ่มให้กด (← → เปลี่ยนชิ้น, ↑ ↓ ปรับ Token, 5 = +5 Token, Enter เคาะ, F เต็มจอ, H ซ่อน/แสดงคำแนะนำ)</p>
+        <p>กด "ประมูลสด" ด้านบนเพื่อเริ่มงาน — จอนั้นควบคุมด้วยคีย์บอร์ดล้วน ไม่มีปุ่มให้กด (← → เปลี่ยนชิ้น, ↑ ↓ ปรับ Token, 5 = +5 Token, Enter เคาะ, F เต็มจอ) แถบคีย์ลัดและเมนูนำทางด้านบนจะซ่อนเองทันทีที่เริ่มกดใช้งาน — กด H เพื่อเรียกกลับมา (เช่น ตอนจะสลับไปหน้าตั้งค่า)</p>
       </div>
     </div>
   </section>
@@ -577,6 +579,7 @@
       legendAutoHideArmed = true;
       legendHidden = false;
       document.getElementById("kbd-legend").classList.remove("hidden");
+      document.querySelector(".topnav").classList.remove("nav-hidden");
     }
     if(name==="summary") renderSummary();
   }
@@ -1113,9 +1116,10 @@
       document.exitFullscreen && document.exitFullscreen();
     }
   }
-  function toggleLegend(){
+  function toggleChrome(){
     legendHidden = !legendHidden;
     document.getElementById("kbd-legend").classList.toggle("hidden", legendHidden);
+    document.querySelector(".topnav").classList.toggle("nav-hidden", legendHidden);
   }
   document.addEventListener("keydown", function(e){
     try{
@@ -1129,7 +1133,7 @@
       var isStageKey = e.key==="ArrowRight"||e.key==="ArrowLeft"||e.key==="ArrowUp"||e.key==="ArrowDown"||e.key==="5"||e.key==="Enter";
       if(legendAutoHideArmed && isStageKey){
         legendAutoHideArmed = false;
-        if(!legendHidden) toggleLegend();
+        if(!legendHidden) toggleChrome();
       }
       if(e.key==="ArrowRight"){ e.preventDefault(); goToItem(1); }
       else if(e.key==="ArrowLeft"){ e.preventDefault(); goToItem(-1); }
@@ -1138,7 +1142,7 @@
       else if(e.key==="5"){ e.preventDefault(); bidStep(5); }
       else if(e.key==="Enter"){ triggerStrike(); }
       else if(e.code==="KeyF"){ toggleFullscreen(); }
-      else if(e.code==="KeyH"){ toggleLegend(); }
+      else if(e.code==="KeyH"){ toggleChrome(); }
     }catch(err){
       console.error("คีย์ลัดทำงานผิดพลาด:", err);
       pendingStrike = false;
