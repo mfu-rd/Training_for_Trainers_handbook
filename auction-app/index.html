@@ -1025,6 +1025,22 @@
     e.stopPropagation();
   });
 
+  // strip the one-shot celebration classes right after they finish — otherwise they
+  // linger on the elements, and coming back to this screen later (display:none -> flex)
+  // restarts each CSS animation from scratch, replaying a stale strike nobody triggered.
+  document.getElementById("hammer").addEventListener("animationend", function(){
+    this.classList.remove("go");
+  });
+  document.getElementById("flash").addEventListener("animationend", function(){
+    this.classList.remove("go");
+  });
+  priceEl.addEventListener("animationend", function(e){
+    if(e.animationName === "priceStrike") priceEl.classList.remove("struck");
+  });
+  frameEl.addEventListener("animationend", function(e){
+    if(e.animationName === "frameIn") frameEl.classList.remove("enter");
+  });
+
   function celebrate(){
     var hammer = document.getElementById("hammer");
     hammer.classList.remove("go"); void hammer.offsetWidth; hammer.classList.add("go");
