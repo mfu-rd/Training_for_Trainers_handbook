@@ -161,6 +161,13 @@
   @keyframes floatDrift2{ from{ transform:translate(0,0) rotate(20deg); } to{ transform:translate(-14px,10px) rotate(32deg); } }
   @keyframes floatDrift3{ from{ transform:translate(0,0) rotate(45deg); } to{ transform:translate(-10px,-12px) rotate(60deg); } }
 
+  .floaty-emoji{ position:absolute; z-index:0; font-size:22px; opacity:.5; pointer-events:none; }
+  .e1{ top:14%; right:16%; animation:floatBob1 6s ease-in-out infinite; }
+  .e2{ bottom:16%; left:14%; animation:floatBob2 7s ease-in-out infinite; }
+  .e3{ top:60%; right:8%; font-size:18px; animation:floatBob1 5s ease-in-out infinite reverse; }
+  @keyframes floatBob1{ 0%,100%{ transform:translateY(0) rotate(-6deg); } 50%{ transform:translateY(-12px) rotate(6deg); } }
+  @keyframes floatBob2{ 0%,100%{ transform:translateY(0) rotate(4deg); } 50%{ transform:translateY(10px) rotate(-4deg); } }
+
   .auction-stage{
     position:relative; z-index:1; width:100%; max-width:1600px; overflow:hidden;
     display:flex; flex-wrap:nowrap; align-items:center; justify-content:center;
@@ -175,12 +182,15 @@
   .frame{
     width:min(100%, 640px, 78vh); margin:0 auto; aspect-ratio:1/1; position:relative;
     display:flex; align-items:center; justify-content:center;
+    background:var(--panel); border:3px solid rgba(255,255,255,.10); border-radius:32px;
+    padding:clamp(14px,3vw,32px);
     transition:transform .5s var(--ease-pop), opacity .4s;
   }
   .frame-media{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
   .frame img{
     max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain;
     filter:drop-shadow(0 26px 30px rgba(0,0,0,.5));
+    border-radius:20px;
   }
   .frame .no-photo{ display:flex; flex-direction:column; align-items:center; gap:10px; color:var(--gold-deep); }
   .frame .no-photo svg{ width:56px; height:56px; opacity:.55; }
@@ -190,11 +200,19 @@
     from{ transform:translateY(10px) scale(.97); opacity:0; }
     to{ transform:translateY(0) scale(1); opacity:1; }
   }
+  .stage-tag{
+    position:absolute; top:-16px; left:26px; z-index:4;
+    background:var(--pink); color:#fff; font-weight:800; font-size:13px; letter-spacing:.03em;
+    padding:7px 16px; border-radius:10px; transform:rotate(-6deg);
+    box-shadow:0 8px 16px rgba(236,72,153,.4);
+    animation:tagWiggle 3.2s ease-in-out infinite;
+  }
+  @keyframes tagWiggle{ 0%,100%{ transform:rotate(-6deg); } 50%{ transform:rotate(-2deg); } }
   .counter-badge{
-    position:absolute; top:0; right:0; z-index:3;
+    position:absolute; top:16px; right:16px; z-index:3;
     display:flex; align-items:center; gap:6px;
-    background:rgba(23,16,41,.62); backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.10); border-radius:999px;
+    background:rgba(23,16,41,.72); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.14); border-radius:999px;
     padding:7px 14px; font-family:var(--num-font); font-size:13px; letter-spacing:.04em;
     color:var(--cream);
   }
@@ -202,6 +220,11 @@
 
   .detail{ display:flex; flex-direction:column; align-items:flex-start; flex:0 1 560px; min-width:0; }
   @media (max-width:760px){ .detail{ align-items:center; text-align:center; flex-basis:auto; } }
+  .item-eyebrow{
+    display:inline-block; background:var(--yellow); color:#3a2b05; font-weight:800;
+    font-size:12px; letter-spacing:.04em; padding:5px 14px; border-radius:999px;
+    margin-bottom:12px; transform:rotate(-2deg);
+  }
   .item-name{
     font-size:clamp(24px,min(3.6vw,6vh),52px); font-weight:800; line-height:1.15;
     color:var(--cream);
@@ -211,6 +234,12 @@
   .item-desc{ font-size:14px; color:var(--muted); margin-top:6px; }
   .hairline{ width:56px; height:1px; background:var(--gold); opacity:.55; margin:clamp(10px,2.4vh,22px) 0; }
 
+  .price-card{
+    background:var(--panel); border:3px solid rgba(255,255,255,.10); border-radius:26px;
+    padding:clamp(14px,2.2vh,22px) clamp(20px,3vw,30px);
+    display:inline-flex; flex-direction:column; align-items:flex-start;
+  }
+  @media (max-width:760px){ .price-card{ align-items:center; } }
   .price-label{ font-family:var(--num-font); font-size:12px; color:var(--muted); letter-spacing:.16em; text-transform:uppercase; }
 
   .price{
@@ -339,7 +368,7 @@
 
   /* keep motion minimal for anyone who asked for it, across every animated element */
   @media (prefers-reduced-motion:reduce){
-    .ambient, .floaty{ animation:none!important; }
+    .ambient, .floaty, .floaty-emoji, .stage-tag{ animation:none!important; }
     .frame.enter, .price.bump .odo-digit-wrap:not(.leading), .price.struck,
     .sold-tag.show, .name-capture.show, .hammer.go, .flash.go, .item-row{ animation:none!important; }
     .odo-strip, .odo-digit-wrap, .odo-comma-wrap{ transition:none!important; }
@@ -403,9 +432,13 @@
       <span class="floaty f3" aria-hidden="true"></span>
       <span class="floaty f4" aria-hidden="true"></span>
       <span class="floaty f5" aria-hidden="true"></span>
+      <span class="floaty-emoji e1" aria-hidden="true">✨</span>
+      <span class="floaty-emoji e2" aria-hidden="true">🎉</span>
+      <span class="floaty-emoji e3" aria-hidden="true">⭐</span>
       <div class="auction-stage" id="stage">
         <div class="showcase">
           <div class="frame" id="frame">
+            <span class="stage-tag">⚡ กำลังประมูล</span>
             <div class="frame-media" id="frame-media">
               <div class="no-photo">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -417,17 +450,20 @@
         </div>
 
         <div class="detail">
+          <span class="item-eyebrow">🎁 ของรางวัลชิ้นนี้</span>
           <div class="item-name" id="item-name">—</div>
           <div class="item-desc" id="item-desc"></div>
           <div class="hairline"></div>
-          <div class="price-label">TOKEN ปัจจุบัน</div>
-          <div class="price" id="price"><span class="odo" id="odo"></span><span class="unit">Token</span></div>
+          <div class="price-card">
+            <div class="price-label">TOKEN ปัจจุบัน</div>
+            <div class="price" id="price"><span class="odo" id="odo"></span><span class="unit">Token</span></div>
+          </div>
 
           <div class="sold-tag" id="sold-tag">
             <div class="sold-banner">
               <div class="sold-tag-row">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4l6 6-8.5 8.5a3 3 0 01-4.24 0 3 3 0 010-4.24L14 4z"/><path d="M3 21l4-4"/><path d="M12.5 5.5l6 6"/></svg>
-                <span id="sold-tag-text">ผู้ชนะประมูล หมายเลข ...</span>
+                <span id="sold-tag-text">🏆 ผู้ชนะประมูล หมายเลข ...</span>
               </div>
             </div>
             <span class="sold-hint">กด Enter เพื่อแก้ไขหมายเลขผู้ชนะ</span>
@@ -850,7 +886,7 @@
     updateOdometer(currentPrice, false);
     var soldTag = document.getElementById("sold-tag");
     soldTag.classList.toggle("show", !!it.sold);
-    if(it.sold) document.getElementById("sold-tag-text").textContent = "ผู้ชนะประมูล หมายเลข " + it.winner;
+    if(it.sold) document.getElementById("sold-tag-text").textContent = "🏆 ผู้ชนะประมูล หมายเลข " + it.winner;
     cancelStrike();
     confettiParticles = [];
     if(confettiCtx) confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
@@ -980,7 +1016,7 @@
     saveState(true);
     pendingStrike = false;
     nameCaptureEl.classList.remove("show");
-    document.getElementById("sold-tag-text").textContent = "ผู้ชนะประมูล หมายเลข " + it.winner;
+    document.getElementById("sold-tag-text").textContent = "🏆 ผู้ชนะประมูล หมายเลข " + it.winner;
     document.getElementById("sold-tag").classList.add("show");
   }
   winnerInput.addEventListener("keydown", function(e){
