@@ -381,13 +381,19 @@ export async function voidTransaction({ actorUid, transactionId, voidReason }) {
  * ให้เปิดลิงก์นั้นกดสร้าง index หนึ่งครั้ง แล้วใช้งานได้ตลอดไป
  *   - transactions: actorUid ASC + createdAt DESC
  *   - transactions: targetUid ASC + createdAt DESC
+ *
+ * EVENT_START กรองรายการทดสอบก่อนวันงานจริงออกจากทุกหน้าจอ (ไม่ลบข้อมูลจริง
+ * แค่ไม่ query กลับมาแสดง) — Firestore rules ห้ามลบเอกสาร transactions แม้แต่
+ * แอดมิน (กัน audit trail จริงถูกลบทีหลัง) รายการทดสอบก่อน 28 ก.ย. 2569 ที่ทำไว้
+ * ตอนพัฒนา/ทดสอบระบบจึงยังอยู่ในฐานข้อมูลแต่ไม่มีใครเห็นในหน้าจอไหนเลย
  */
+const EVENT_START = new Date('2026-09-28T00:00:00+07:00');
 
 /**
  * ประวัติรายการที่ "ผู้ใช้คนนี้เป็นคนทำ" (ใช้ใน TrainerHistory)
  * @param {string} actorUid
  * @param {number} [max=100]
- * @returns {Promise<object[]>} `{ id, ...data }` เรียง createdAt ใหม่→เก่า
+ * @returns {Promise<object[]>} `{ id, ...data }` เรียง createdAt ใหม่→เก่า (เฉพาะตั้งแต่วันเริ่มงานจริง)
  */
 export async function listTransactionsByActor(actorUid, max = 100) {
   if (!actorUid) return [];
@@ -395,6 +401,7 @@ export async function listTransactionsByActor(actorUid, max = 100) {
     query(
       collection(db, 'transactions'),
       where('actorUid', '==', actorUid),
+      where('createdAt', '>=', EVENT_START),
       orderBy('createdAt', 'desc'),
       limit(max)
     )
@@ -406,7 +413,7 @@ export async function listTransactionsByActor(actorUid, max = 100) {
  * ประวัติรายการที่ "เกิดกับยอดของผู้ใช้คนนี้" (ใช้ใน ParticipantDashboard)
  * @param {string} targetUid
  * @param {number} [max=100]
- * @returns {Promise<object[]>} `{ id, ...data }` เรียง createdAt ใหม่→เก่า
+ * @returns {Promise<object[]>} `{ id, ...data }` เรียง createdAt ใหม่→เก่า (เฉพาะตั้งแต่วันเริ่มงานจริง)
  */
 export async function listTransactionsByTarget(targetUid, max = 100) {
   if (!targetUid) return [];
@@ -414,6 +421,7 @@ export async function listTransactionsByTarget(targetUid, max = 100) {
     query(
       collection(db, 'transactions'),
       where('targetUid', '==', targetUid),
+      where('createdAt', '>=', EVENT_START),
       orderBy('createdAt', 'desc'),
       limit(max)
     )
@@ -424,11 +432,16 @@ export async function listTransactionsByTarget(targetUid, max = 100) {
 /**
  * รายการทั้งหมดในระบบ (แอดมินเท่านั้น — ใช้ใน TransactionEditor / ExportData)
  * @param {number} [max=500]
- * @returns {Promise<object[]>} `{ id, ...data }` เรียง createdAt ใหม่→เก่า
+ * @returns {Promise<object[]>} `{ id, ...data }` เรียง createdAt ใหม่→เก่า (เฉพาะตั้งแต่วันเริ่มงานจริง)
  */
 export async function listAllTransactions(max = 500) {
   const snap = await getDocs(
-    query(collection(db, 'transactions'), orderBy('createdAt', 'desc'), limit(max))
+    query(
+      collection(db, 'transactions'),
+      where('createdAt', '>=', EVENT_START),
+      orderBy('createdAt', 'desc'),
+      limit(max)
+    )
   );
   return docsToArray(snap);
 }
