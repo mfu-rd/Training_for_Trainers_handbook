@@ -10,46 +10,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --color-primary:#FF0000;
-    --color-primary-hover:#CC0000;
-    --color-secondary:#065FD4;
-    --color-neutral:#606060;
-    --color-bg:#FFFFFF;
-    --color-surface:#F2F2F2;
-    --color-surface-hover:#E9E9E9;
-    --color-text:#0F0F0F;
-    --color-text-secondary:#606060;
-    --color-border:#E5E5E5;
+    --color-primary:#FF3E88;
+    --color-primary-hover:#FF5C9E;
+    --color-secondary:#FFA53E;
+    --color-neutral:#A0A0A0;
+    --color-bg:#191330;
+    --color-surface:#241C42;
+    --color-surface-hover:#2E2450;
+    --color-text:#FFFFFF;
+    --color-text-secondary:rgba(255,255,255,0.65);
+    --color-border:rgba(255,255,255,0.10);
     --radius-xs:8px;
     --radius-sm:16px;
     --radius-md:24px;
     --radius-full:9999px;
-    --shadow-1:0 1px 3px rgba(0,0,0,0.08);
-    --shadow-2:0 8px 24px rgba(0,0,0,0.12);
-    --container-max:1400px;
-    --font:'Prompt', sans-serif;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --color-bg:#111111;
-      --color-surface:#1E1E1E;
-      --color-surface-hover:#282828;
-      --color-text:#F2F2F2;
-      --color-text-secondary:#A0A0A0;
-      --color-border:rgba(255,255,255,0.08);
-      --shadow-1:none;
-      --shadow-2:0 8px 24px rgba(0,0,0,0.4);
-    }
-  }
-  :root[data-theme="dark"]{
-    --color-bg:#111111;
-    --color-surface:#1E1E1E;
-    --color-surface-hover:#282828;
-    --color-text:#F2F2F2;
-    --color-text-secondary:#A0A0A0;
-    --color-border:rgba(255,255,255,0.08);
     --shadow-1:none;
     --shadow-2:0 8px 24px rgba(0,0,0,0.4);
+    --container-max:1400px;
+    --font:'Prompt', sans-serif;
   }
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
@@ -80,12 +58,6 @@
   .nav-links a:hover{ background:var(--color-surface); }
   .nav-links a.current{ background:var(--color-surface); font-weight:600; }
   .site-header.nav-open .nav-links{ display:flex; }
-  .theme-toggle{
-    width:40px; height:40px; border-radius:var(--radius-full); border:1px solid var(--color-border);
-    background:var(--color-bg); color:var(--color-text); cursor:pointer; font-size:16px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .theme-toggle:hover{ background:var(--color-surface); }
   .header-actions{ display:flex; align-items:center; gap:8px; }
   .hamburger{
     display:none; width:40px; height:40px; border-radius:var(--radius-full);
@@ -106,7 +78,6 @@
   .sidebar a.current{ background:var(--color-surface); font-weight:600; }
   .sidebar-brand{ font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px; margin-bottom:20px; }
   .sidebar-brand .dot{ width:10px; height:10px; border-radius:var(--radius-full); background:var(--color-primary); display:inline-block; }
-  .sidebar .theme-toggle{ margin-top:20px; align-self:flex-start; }
   .content{ flex:1; min-width:0; }
   @media (min-width: 721px){ .site-header{ display:none; } }
 
@@ -114,23 +85,27 @@
   .section-title{
     display:inline-block; font-size:22px; font-weight:600; margin:0 0 12px;
     padding:6px 20px; border-radius:var(--radius-sm);
-    background:linear-gradient(to top, #470303, #A60000); color:#FFFFFF;
+    background:linear-gradient(90deg,#FF3E88,#FFA53E); color:#FFFFFF;
   }
   .section-sub{ color:var(--color-text-secondary); font-size:14px; margin:0 0 28px; max-width:720px; }
   .section-sub strong{ color:var(--color-text); }
 
-  .card{ background:var(--color-surface); border-radius:var(--radius-md); box-shadow:var(--shadow-1); }
+  .card{ background:var(--color-surface); border-radius:var(--radius-md); border:1px solid var(--color-border); }
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
 
-  .item-card{ padding:0; overflow:hidden; display:flex; flex-direction:column; }
+  .item-card{ padding:0; overflow:hidden; display:flex; flex-direction:column; border-top:4px solid var(--accent, #FF3E88); }
+  .card-grid .item-card:nth-child(4n+1){ --accent:#14B8A6; }
+  .card-grid .item-card:nth-child(4n+2){ --accent:#F97316; }
+  .card-grid .item-card:nth-child(4n+3){ --accent:#EC4899; }
+  .card-grid .item-card:nth-child(4n+4){ --accent:#8B5CF6; }
   .item-photo{
-    aspect-ratio:1/1; background:var(--color-bg); display:flex; align-items:center; justify-content:center;
+    aspect-ratio:1/1; background:transparent; display:flex; align-items:center; justify-content:center;
   }
   .item-photo img{ width:100%; height:100%; object-fit:contain; padding:16px; }
   .item-body{ padding:16px 20px 20px; }
   .item-name{ margin:0 0 8px; font-size:16px; font-weight:600; line-height:1.4; }
   .item-price{ font-size:14px; color:var(--color-text-secondary); }
-  .item-price .n{ font-size:20px; font-weight:700; color:var(--color-text); }
+  .item-price .n{ font-size:20px; font-weight:700; color:var(--accent, #FF3E88); }
 
   footer{ padding:32px 0; text-align:center; color:var(--color-text-secondary); font-size:13px; }
 
@@ -155,7 +130,6 @@
       <li><a href="index.html#contact">ติดต่อ</a></li>
     </ul>
     <div class="header-actions">
-      <button class="theme-toggle theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
       <button class="hamburger" id="hamburgerBtn" aria-label="เปิดเมนู">☰</button>
     </div>
   </div>
@@ -170,7 +144,6 @@
       <a href="index.html#agenda">กำหนดการ</a>
       <a href="auction-catalog.html" class="current">ของรางวัลประมูล</a>
       <a href="index.html#contact">ติดต่อ</a>
-      <button class="theme-toggle theme-toggle-btn" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
     </aside>
     <div class="content">
 
@@ -256,6 +229,27 @@
               <div class="item-price">เริ่มต้น <span class="n">3</span> Token</div>
             </div>
           </div>
+          <div class="card item-card">
+            <div class="item-photo"><img src="assets/images/auction/camping-set.png" alt="Camping Set" loading="lazy"></div>
+            <div class="item-body">
+              <h3 class="item-name">Camping Set</h3>
+              <div class="item-price">เริ่มต้น <span class="n">1</span> Token</div>
+            </div>
+          </div>
+          <div class="card item-card">
+            <div class="item-photo"><img src="assets/images/auction/crown-tft.png" alt="มงกุฎแห่ง TFT" loading="lazy"></div>
+            <div class="item-body">
+              <h3 class="item-name">มงกุฎแห่ง TFT</h3>
+              <div class="item-price">เริ่มต้น <span class="n">1</span> Token</div>
+            </div>
+          </div>
+          <div class="card item-card">
+            <div class="item-photo"><img src="assets/images/auction/lamborghini-ravuelto.png" alt="Lanborghinhi Ravuelto" loading="lazy"></div>
+            <div class="item-body">
+              <h3 class="item-name">Lanborghinhi Ravuelto</h3>
+              <div class="item-price">เริ่มต้น <span class="n">1</span> Token</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -284,28 +278,6 @@
       hamburgerBtn.textContent = '☰';
     });
   });
-
-  function readStoredTheme(){ try { return localStorage.getItem('tft-theme'); } catch(e) { return null; } }
-  function writeStoredTheme(v){ try { localStorage.setItem('tft-theme', v); } catch(e) {} }
-
-  const themeToggles = document.querySelectorAll('.theme-toggle-btn');
-  const root = document.documentElement;
-  const saved = readStoredTheme();
-  if (saved) root.setAttribute('data-theme', saved);
-  updateToggleIcon();
-  themeToggles.forEach(btn => btn.addEventListener('click', () => {
-    const current = root.getAttribute('data-theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    const next = current === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    writeStoredTheme(next);
-    updateToggleIcon();
-  }));
-  function updateToggleIcon(){
-    const current = root.getAttribute('data-theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    themeToggles.forEach(btn => btn.textContent = current === 'dark' ? '☀️' : '🌙');
-  }
 </script>
 
 </body>
