@@ -299,6 +299,38 @@
     section{ padding:36px 0; }
     .layout{ display:block; padding-left:20px; padding-right:20px; }
     .sidebar{ display:none; }
+
+    /* Stack schedule/mentor tables as cards on mobile instead of squeezing columns */
+    .table-wrap{ overflow-x:visible; border:none; }
+    .schedule-table, .day7-table, .mentor-table{ min-width:0; width:100%; }
+    .schedule-table thead, .day7-table thead, .mentor-table thead{
+      position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
+    }
+    .schedule-table tbody, .day7-table tbody, .mentor-table tbody{ display:block; }
+    .schedule-table tr, .day7-table tr, .mentor-table tr{
+      display:block; padding:14px 16px; border-top:1px solid var(--color-border);
+      border-radius:var(--radius-sm); background:var(--color-surface); margin-bottom:10px;
+    }
+    .schedule-table tr:first-child, .day7-table tr:first-child, .mentor-table tr:first-child{ border-top:none; }
+    .schedule-table td, .day7-table td, .mentor-table td{
+      display:flex; gap:8px; padding:4px 0; border-top:none; max-width:none;
+    }
+    .schedule-table td:empty, .day7-table td:empty, .mentor-table td:empty{ display:none; }
+    .schedule-table td::before, .day7-table td::before, .mentor-table td::before{
+      content:attr(data-label); flex:none; width:88px; font-weight:600;
+      color:var(--color-text-secondary);
+    }
+    .schedule-table td.time::before{ content:"เวลา"; }
+    .schedule-table td:nth-child(2)::before{ content:"รายการ"; }
+    .schedule-table td.hours::before{ content:"ชม."; }
+    .schedule-table td.place::before{ content:"สถานที่"; }
+    .schedule-table td.docs::before{ content:"เอกสาร"; }
+    .day7-table td.time::before{ content:"เวลา"; }
+    .day7-table td:nth-child(2)::before{ content:"รายการ"; }
+    .day7-table td.place::before{ content:"สถานที่"; }
+    .mentor-table td:nth-child(1)::before{ content:"กลุ่ม"; }
+    .mentor-table td:nth-child(2)::before{ content:"สาขาวิจัย"; }
+    .mentor-table td:nth-child(3)::before{ content:"วิทยากรที่ปรึกษา"; }
   }
 </style>
 </head>
@@ -440,7 +472,7 @@
 
       <div class="day-panel active" id="panel-d1">
         <div class="table-wrap">
-          <table>
+          <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
               <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
@@ -462,7 +494,7 @@
 
       <div class="day-panel" id="panel-d2">
         <div class="table-wrap">
-          <table>
+          <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
               <tr><td class="time">08.30 – 08.45</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
@@ -485,7 +517,7 @@
 
       <div class="day-panel" id="panel-d3">
         <div class="table-wrap">
-          <table>
+          <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
               <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
@@ -505,7 +537,7 @@
 
       <div class="day-panel" id="panel-d4">
         <div class="table-wrap">
-          <table>
+          <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
               <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
@@ -527,7 +559,7 @@
 
       <div class="day-panel" id="panel-d5">
         <div class="table-wrap">
-          <table>
+          <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
               <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
@@ -546,7 +578,7 @@
 
       <div class="day-panel" id="panel-orientation">
         <div class="table-wrap">
-          <table>
+          <table class="day7-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>สถานที่</th></tr></thead>
             <tbody>
               <tr>
@@ -564,7 +596,7 @@
 
       <h3 class="subheading">วิทยากรที่ปรึกษาประจำกลุ่ม</h3>
       <div class="table-wrap">
-        <table>
+        <table class="mentor-table">
           <thead><tr><th>กลุ่ม</th><th>สาขาวิจัย</th><th>วิทยากรที่ปรึกษา</th></tr></thead>
           <tbody>
             <tr><td class="hours">1</td><td>วิศวกรรมศาสตร์</td><td>รศ.ดร.พรรณฤมล เต็มดี (ม.แม่ฟ้าหลวง), รศ.ดร.จันจิรา จับศิลป์ (ม.ศรีนครินทรวิโรฒ)</td></tr>
