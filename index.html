@@ -304,7 +304,7 @@
 
     /* Stack schedule/mentor tables as cards on mobile instead of squeezing columns */
     .table-wrap{ overflow-x:visible; border:none; }
-    .schedule-table, .day7-table, .mentor-table{ min-width:0; width:100%; }
+    .schedule-table, .day7-table, .mentor-table{ display:block; min-width:0; width:100%; }
     .schedule-table thead, .day7-table thead, .mentor-table thead{
       position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
     }
@@ -322,6 +322,9 @@
       content:attr(data-label); flex:none; width:88px; font-weight:600;
       color:var(--color-text-secondary);
     }
+    .schedule-table td > *, .day7-table td > *, .mentor-table td > *{ min-width:0; }
+    .doc-links{ min-width:0; }
+    .doc-btn{ white-space:normal; word-break:break-word; }
     .schedule-table td.time::before{ content:"เวลา"; }
     .schedule-table td:nth-child(2)::before{ content:"รายการ"; }
     .schedule-table td.hours::before{ content:"ชม."; }
@@ -465,15 +468,15 @@
       </div>
 
       <div class="day-tabs" id="dayTabs">
-        <button class="chip active" data-day="d1">วันที่ 1 (28 ก.ย.)</button>
-        <button class="chip" data-day="d2">วันที่ 2 (29 ก.ย.)</button>
-        <button class="chip" data-day="d3">วันที่ 3 (30 ก.ย.)</button>
-        <button class="chip" data-day="d4">วันที่ 4 (1 ต.ค.)</button>
+        <button class="chip" data-day="d1">วันที่ 1 (28 ก.ย.) (เสร็จสิ้น)</button>
+        <button class="chip" data-day="d2">วันที่ 2 (29 ก.ย.) (เสร็จสิ้น)</button>
+        <button class="chip" data-day="d3">วันที่ 3 (30 ก.ย.) (เสร็จสิ้น)</button>
+        <button class="chip active" data-day="d4">วันที่ 4 (1 ต.ค.)</button>
         <button class="chip" data-day="d5">วันที่ 5 (2 ต.ค.)</button>
-        <button class="chip" data-day="orientation">ปฐมนิเทศ 17 ก.ย. (ผ่านไปแล้ว)</button>
+        <button class="chip" data-day="orientation">ปฐมนิเทศ 17 ก.ย. (เสร็จสิ้น)</button>
       </div>
 
-      <div class="day-panel active" id="panel-d1">
+      <div class="day-panel" id="panel-d1">
         <div class="table-wrap">
           <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
@@ -501,8 +504,7 @@
           <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
-              <tr><td class="time">08.30 – 08.45</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
-              <tr><td class="time">08.45 – 09.00</td><td>พิธีเปิด — กล่าวต้อนรับ โดย รองอธิการบดี ม.แม่ฟ้าหลวง (ศ.ดร.สุจิตรา วงศ์เกษมจิตต์); กล่าวเปิดกิจกรรม โดย ผู้อำนวยการ วช. หรือผู้แทน</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
+              <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
               <tr><td class="time">09.00 – 10.00</td><td>หมวดที่ 3 การทบทวนวรรณกรรมและการวิเคราะห์บริบททางการวิจัย และการนำเสนอโจทย์การวิจัย (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://drive.google.com/drive/folders/1Qrn0BP0WqpQSf2ogEM8426C7iLl8SGl1" target="_blank" rel="noopener">📄 แบบฟอร์มปฏิบัติการหมวด 2-6</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1Emk8OMmABFGaujmc94L6D7M79qdt0bOP" target="_blank" rel="noopener">📄 แผนร่างยุทธศาสตร์ ววน. 71-75</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1qmT05z2b6j9jgvS5aXUa-TXeAMJWwj51" target="_blank" rel="noopener">📄 เอกสารภาคปฏิบัติ แผนววน. 66-70 (ใช้จริง)</a></div></td></tr>
               <tr><td class="time">10.00 – 11.00</td><td>นำเสนอโจทย์วิจัย (Pitching) — นำเสนอกลุ่มละ 5 นาที คอมเมนต์โดยผู้ทรงคุณวุฒิ 2 ท่าน</td><td class="hours">1</td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://claude.ai/artifact/GusDaRyxH7hsmpvyqSkLeB?sk=0PYNComjGCDdqm-JKvPvDA" target="_blank" rel="noopener">📎 ช่องทางและรายละเอียดการส่งเอกสาร</a></div></td></tr>
               <tr class="break"><td class="time">11.00 – 11.15</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
@@ -524,7 +526,8 @@
           <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
             <tbody>
-              <tr><td class="time">08.30 – 09.00</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
+              <tr><td class="time">08.30 – 08.45</td><td>ลงทะเบียน (ภาคเช้า)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
+              <tr><td class="time">08.45 – 09.00</td><td>พิธีเปิด — กล่าวต้อนรับ โดย รองอธิการบดี ม.แม่ฟ้าหลวง (ศ.ดร.สุจิตรา วงศ์เกษมจิตต์); กล่าวเปิดกิจกรรม โดย ผู้อำนวยการ วช. หรือผู้แทน</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
               <tr><td class="time">09.00 – 10.30</td><td>หมวดที่ 5 การเขียนข้อเสนอการวิจัยเชิงบูรณาการ (ภาคทฤษฎี) — วิทยากร: ศ.ดร.ผดุงศักดิ์ รัตนเดโช (ผู้ทรงคุณวุฒิ สำนักงานการวิจัยแห่งชาติ และ บพท.)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://drive.google.com/drive/folders/1gPuDlipSTTzfKlDqLOUMG5BZMe4o4eFz" target="_blank" rel="noopener">📄 เอกสารประกอบ</a><a class="doc-btn" href="https://forms.gle/MuqQ5gR3vzzR1F1M6" target="_blank" rel="noopener">📝 Pretest</a><a class="doc-btn" href="https://forms.gle/qC1QE2LYCcG8ouN78" target="_blank" rel="noopener">📝 Posttest</a></div></td></tr>
               <tr class="break"><td class="time">10.30 – 10.45</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
               <tr><td class="time">10.45 – 12.00</td><td>หมวดที่ 5 (ภาคทฤษฎี ต่อ) — วิทยากร: ศ.ดร.ผดุงศักดิ์ รัตนเดโช</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://drive.google.com/drive/folders/1gPuDlipSTTzfKlDqLOUMG5BZMe4o4eFz" target="_blank" rel="noopener">📄 เอกสารประกอบ</a><a class="doc-btn" href="https://forms.gle/MuqQ5gR3vzzR1F1M6" target="_blank" rel="noopener">📝 Pretest</a><a class="doc-btn" href="https://forms.gle/qC1QE2LYCcG8ouN78" target="_blank" rel="noopener">📝 Posttest</a></div></td></tr>
@@ -539,7 +542,7 @@
         </div>
       </div>
 
-      <div class="day-panel" id="panel-d4">
+      <div class="day-panel active" id="panel-d4">
         <div class="table-wrap">
           <table class="schedule-table">
             <thead><tr><th>เวลา</th><th>รายการ</th><th>ชม.</th><th>สถานที่</th><th>เอกสาร/แบบทดสอบ</th></tr></thead>
@@ -553,7 +556,7 @@
               <tr class="break"><td class="time">13.00 – 13.15</td><td>ลงทะเบียน (ภาคบ่าย)</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
               <tr><td class="time">13.15 – 15.15</td><td>ศึกษาดูงานศูนย์ความเป็นเลิศ มฟล.:<br>1) พิพิธภัณฑ์สถาบันศิลปวัฒนธรรมและอารยธรรมลุ่มน้ำโขง<br>2) โรงงานแปรรูปและโรงงานผลิตยาสมุนไพร ศูนย์นวัตกรรมสมุนไพรครบวงจร<br>3) โรงงานต้นแบบเครื่องสำอาง และ Cosmetic Maker Space</td><td class="hours"></td><td class="place">มหาวิทยาลัยแม่ฟ้าหลวง</td><td class="docs"></td></tr>
               <tr class="break"><td class="time">15.15 – 15.30</td><td>รับประทานอาหารว่าง</td><td class="hours"></td><td class="place">ห้องประชุมวนาทัศน์</td><td class="docs"></td></tr>
-              <tr><td class="time">15.30 – 18.30</td><td>หมวดที่ 6 (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาทัศน์</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://drive.google.com/drive/folders/1Qrn0BP0WqpQSf2ogEM8426C7iLl8SGl1" target="_blank" rel="noopener">📄 แบบฟอร์มปฏิบัติการหมวด 2-6</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1Emk8OMmABFGaujmc94L6D7M79qdt0bOP" target="_blank" rel="noopener">📄 แผนร่างยุทธศาสตร์ ววน. 71-75</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1qmT05z2b6j9jgvS5aXUa-TXeAMJWwj51" target="_blank" rel="noopener">📄 เอกสารภาคปฏิบัติ แผนววน. 66-70 (ใช้จริง)</a></div></td></tr>
+              <tr><td class="time">15.30 – 18.30</td><td>หมวดที่ 6 (ภาคปฏิบัติ) — กิจกรรมกลุ่ม (วิทยากรอยู่ประจำกลุ่ม)</td><td class="hours">3</td><td class="place">ห้องประชุมวนาทัศน์</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://drive.google.com/drive/folders/1Qrn0BP0WqpQSf2ogEM8426C7iLl8SGl1" target="_blank" rel="noopener">📄 แบบฟอร์มปฏิบัติการหมวด 2-6</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1Emk8OMmABFGaujmc94L6D7M79qdt0bOP" target="_blank" rel="noopener">📄 แผนร่างยุทธศาสตร์ ววน. 71-75</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1qmT05z2b6j9jgvS5aXUa-TXeAMJWwj51" target="_blank" rel="noopener">📄 เอกสารภาคปฏิบัติ แผนววน. 66-70 (ใช้จริง)</a><a class="doc-btn" href="https://drive.google.com/drive/folders/1LVPJbpK2N-OW1upiGBRboLuESx-G_EOp" target="_blank" rel="noopener">📄 เอกสารประกอบการทำใบงาน</a></div></td></tr>
               <tr><td class="time">18.30 – 21.00</td><td>กิจกรรมสร้างเครือข่ายบูรณาการ</td><td class="hours"></td><td class="place">ห้องประชุมวนาสวรรค์</td><td class="docs"></td></tr>
               <tr class="break"><td class="time">21.00</td><td>เข้าที่พัก พักผ่อนตามอัธยาศัย</td><td class="hours"></td><td class="place">ห้องพักวนาศรม</td><td class="docs"></td></tr>
               <tr class="deadline"><td class="time">⏰ 22.00</td><td><strong>กำหนดส่งไฟล์ใบงานที่ 6</strong></td><td class="hours"></td><td class="place">—</td><td class="docs"><div class="doc-links"><a class="doc-btn" href="https://claude.ai/code/artifact/8c38ef2d-cdc3-4506-b5d5-3f1cf80bc72b" target="_blank" rel="noopener">📎 ช่องทางและรายละเอียดการส่งเอกสาร</a></div></td></tr>
